@@ -1,0 +1,5856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>INDIAN TRACTOR SIMULATOR 3D — Desi Farmer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚜</text></svg>" />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Inline All Styles (Single File Standalone) -->
+  <style>
+/* Indian Tractor Simulator 3D - High-Performance Game Styles */
+:root {
+  --primary-gold: #ffb300;
+  --accent-saffron: #ff6f00;
+  --tractor-blue: #1976d2;
+  --field-green: #2e7d32;
+  --bg-dark: rgba(18, 22, 28, 0.92);
+  --panel-bg: rgba(28, 34, 44, 0.88);
+  --border-glow: rgba(255, 179, 0, 0.4);
+  --font-display: 'Teko', sans-serif;
+  --font-sub: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #000;
+  color: #fff;
+  font-family: var(--font-body);
+}
+
+#canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#ui-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ==========================================
+   BUTTONS & TYPOGRAPHY
+   ========================================== */
+.btn {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s ease;
+  font-family: var(--font-sub);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ffb300, #ff6f00);
+  color: #111;
+  box-shadow: 0 4px 15px rgba(255, 111, 0, 0.45);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(255, 111, 0, 0.65);
+}
+
+.btn-secondary {
+  background: var(--panel-bg);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+}
+.btn-secondary:hover {
+  background: rgba(45, 55, 72, 0.95);
+  border-color: var(--primary-gold);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: rgba(0, 0, 0, 0.45);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.btn-icon {
+  font-size: 1.4rem;
+  margin-bottom: 2px;
+}
+.btn-text {
+  font-size: 1.1rem;
+}
+.btn-sub {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+/* ==========================================
+   MAIN MENU OVERLAY
+   ========================================== */
+.menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 30%, rgba(0, 0, 0, 0.15), rgba(8, 12, 16, 0.88));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px 40px;
+  pointer-events: auto;
+}
+
+.menu-header {
+  text-align: center;
+}
+.badge-flag {
+  display: inline-block;
+  padding: 4px 14px;
+  background: rgba(255, 111, 0, 0.2);
+  border: 1px solid rgba(255, 111, 0, 0.6);
+  border-radius: 20px;
+  font-size: 0.82rem;
+  letter-spacing: 2px;
+  color: var(--primary-gold);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.game-title {
+  font-family: var(--font-display);
+  font-size: 4.2rem;
+  line-height: 0.9;
+  letter-spacing: 2px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+}
+.game-title .highlight {
+  color: var(--primary-gold);
+}
+.game-tagline {
+  font-family: var(--font-sub);
+  font-size: 1.15rem;
+  letter-spacing: 1.5px;
+  color: #b0bec5;
+  margin-top: 6px;
+}
+.player-stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 15px;
+  font-family: var(--font-sub);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffd54f;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  max-width: 950px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.menu-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+/* ==========================================
+   IN-GAME HUD
+   ========================================== */
+.hud-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hud-top-bar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.hud-stats {
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+.stat-pill {
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: var(--font-sub);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary-gold);
+  backdrop-filter: blur(6px);
+}
+
+.hud-center-controls {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+.pill-btn {
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  padding: 7px 14px;
+  border-radius: 18px;
+  font-family: var(--font-sub);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.pill-btn:hover {
+  border-color: var(--primary-gold);
+  background: rgba(45, 55, 72, 0.95);
+}
+
+.hud-top-right {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+.icon-btn {
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: var(--primary-gold);
+  color: #111;
+}
+
+/* Minimap */
+.minimap-container {
+  position: absolute;
+  top: 75px;
+  right: 16px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+}
+.minimap-label {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #81c784;
+  letter-spacing: 1px;
+}
+
+/* Mission HUD Card */
+.mission-card {
+  position: absolute;
+  top: 75px;
+  left: 16px;
+  background: var(--bg-dark);
+  border-left: 4px solid var(--primary-gold);
+  padding: 12px 16px;
+  border-radius: 6px;
+  max-width: 320px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+}
+.mission-card.hidden {
+  display: none;
+}
+.mission-card-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.mission-badge {
+  color: var(--primary-gold);
+  letter-spacing: 1px;
+}
+.mission-timer {
+  color: #ff5252;
+}
+.mission-title {
+  font-family: var(--font-sub);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #fff;
+}
+.mission-desc {
+  font-size: 0.8rem;
+  color: #cfd8dc;
+  margin: 4px 0 8px 0;
+  line-height: 1.3;
+}
+.mission-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffb300, #4caf50);
+  transition: width 0.25s ease;
+}
+.mission-dist-text {
+  font-size: 0.75rem;
+  color: #90caf9;
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* Implement Status Card */
+.implement-card {
+  position: absolute;
+  bottom: 120px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 14px;
+  border-radius: 8px;
+  pointer-events: auto;
+  backdrop-filter: blur(6px);
+}
+.impl-icon {
+  font-size: 1.8rem;
+}
+.impl-name {
+  font-family: var(--font-sub);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #fff;
+}
+.impl-state {
+  font-size: 0.75rem;
+  color: #ffd54f;
+}
+
+/* Dashboard Cluster (Bottom Center) */
+.hud-dashboard {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 12px 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+}
+.dash-dial {
+  text-align: center;
+}
+.dial-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #90a4ae;
+}
+.dial-value {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  line-height: 1;
+  font-weight: 600;
+  color: #fff;
+}
+.dial-value .unit {
+  font-size: 0.9rem;
+  color: var(--primary-gold);
+}
+.dash-gear {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--primary-gold);
+  background: rgba(255, 179, 0, 0.15);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-top: 2px;
+}
+.dial-bar-bg {
+  width: 80px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.dial-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #ffb300, #f44336);
+  transition: width 0.1s ease;
+}
+.dash-indicators {
+  display: flex;
+  gap: 8px;
+  font-size: 1.25rem;
+  padding-bottom: 6px;
+}
+.ind-icon {
+  opacity: 0.25;
+  transition: opacity 0.15s ease;
+}
+
+/* ==========================================
+   MOBILE TOUCH CONTROLS
+   ========================================== */
+.mobile-controls-layer {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 20px;
+  pointer-events: none;
+}
+.mobile-left-cluster, .mobile-right-cluster {
+  display: flex;
+  gap: 12px;
+  pointer-events: auto;
+}
+.mobile-center-actions {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+  margin-bottom: 95px; /* Above dashboard */
+}
+.touch-btn {
+  background: rgba(20, 26, 36, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sub);
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+.touch-btn:active {
+  background: var(--primary-gold);
+  color: #111;
+  transform: scale(0.95);
+}
+.steer-btn {
+  width: 65px;
+  height: 65px;
+  font-size: 1.8rem;
+}
+.pedal-btn {
+  width: 70px;
+  height: 95px;
+  flex-direction: column;
+}
+.pedal-icon {
+  font-size: 1.5rem;
+}
+.pedal-label {
+  font-size: 0.65rem;
+  line-height: 1.1;
+  text-align: center;
+}
+.gas-pedal {
+  background: rgba(46, 125, 50, 0.85);
+  border-color: #66bb6a;
+}
+.brake-pedal {
+  background: rgba(198, 40, 40, 0.85);
+  border-color: #ef5350;
+}
+.action-btn {
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: var(--font-sub);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.action-btn:active {
+  background: var(--primary-gold);
+  color: #111;
+}
+
+/* Toast Notifications */
+.toast-notification {
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--primary-gold);
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 20px;
+  font-family: var(--font-sub);
+  font-weight: 600;
+  font-size: 0.95rem;
+  opacity: 0;
+  transition: all 0.25s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(255, 179, 0, 0.35);
+  z-index: 100;
+}
+.toast-notification.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================
+   MODAL WINDOWS (MISSIONS, SETTINGS, MAP)
+   ========================================== */
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  backdrop-filter: blur(6px);
+}
+.modal-box {
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 580px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+.modal-large {
+  max-width: 820px;
+}
+.modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+  color: var(--primary-gold);
+}
+.close-modal {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+}
+
+/* Mission scroll list */
+.mission-scroll-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mission-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 14px 18px;
+  border-radius: 8px;
+}
+.mission-item.completed {
+  border-color: rgba(76, 175, 80, 0.6);
+  background: rgba(46, 125, 50, 0.12);
+}
+.mission-num {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--primary-gold);
+  width: 40px;
+}
+.mission-details {
+  flex: 1;
+}
+.mission-item-title {
+  font-family: var(--font-sub);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.mission-item-desc {
+  font-size: 0.8rem;
+  color: #b0bec5;
+  margin: 4px 0;
+}
+.mission-item-rewards {
+  display: flex;
+  gap: 14px;
+  font-size: 0.8rem;
+  color: #ffd54f;
+  font-weight: 600;
+}
+.btn-sm {
+  padding: 8px 18px;
+  font-size: 0.9rem;
+}
+
+/* Fullscreen Map */
+.map-screen-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.map-grid-legend {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  font-size: 0.78rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.leg-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+.map-canvas-wrapper {
+  background: #1b2e15;
+  border: 2px solid var(--primary-gold);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.map-note {
+  font-size: 0.75rem;
+  color: #b0bec5;
+}
+
+/* Garage Screen */
+.garage-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  padding: 24px;
+}
+.garage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.back-btn {
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: var(--font-sub);
+  font-weight: 700;
+  cursor: pointer;
+}
+.garage-title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  letter-spacing: 2px;
+  color: var(--primary-gold);
+}
+.garage-wallet {
+  font-family: var(--font-sub);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffd54f;
+}
+.garage-content {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+}
+.garage-card {
+  width: 360px;
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  backdrop-filter: blur(8px);
+}
+.tractor-brand {
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+  color: var(--primary-gold);
+  font-weight: 700;
+}
+.tractor-name {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  line-height: 1;
+}
+.tractor-desc {
+  font-size: 0.82rem;
+  color: #cfd8dc;
+  line-height: 1.4;
+}
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+}
+.spec-lbl {
+  display: block;
+  font-size: 0.65rem;
+  color: #90a4ae;
+}
+.spec-val {
+  font-family: var(--font-sub);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+.tractor-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tab-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-family: var(--font-sub);
+  font-weight: 700;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.tab-btn.active {
+  border-color: var(--primary-gold);
+  background: rgba(255, 179, 0, 0.18);
+  color: var(--primary-gold);
+}
+.custom-section .section-title {
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  color: #90a4ae;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.color-palette {
+  display: flex;
+  gap: 8px;
+}
+.color-swatch, .rim-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.color-swatch:hover, .rim-swatch:hover {
+  transform: scale(1.15);
+  border-color: #fff;
+}
+.garage-action-area {
+  margin-top: auto;
+}
+.garage-hint {
+  align-self: flex-end;
+  background: rgba(0, 0, 0, 0.65);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+/* Settings Controls */
+.setting-group {
+  margin-bottom: 20px;
+}
+.setting-group h3 {
+  font-family: var(--font-sub);
+  font-size: 1.1rem;
+  color: var(--primary-gold);
+  margin-bottom: 12px;
+}
+.slider-row, .toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+.slider-row input[type="range"] {
+  width: 180px;
+  accent-color: var(--primary-gold);
+}
+.toggle-row select {
+  background: #222;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Controls Guide Table */
+.controls-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.controls-table th, .controls-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+.controls-table th {
+  color: var(--primary-gold);
+  font-family: var(--font-sub);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .game-title { font-size: 2.8rem; }
+  .menu-overlay { padding: 16px; }
+  .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hud-dashboard { padding: 8px 14px; gap: 10px; }
+  .dial-value { font-size: 1.8rem; }
+  .garage-content { flex-direction: column; }
+  .garage-card { width: 100%; }
+  .mobile-center-actions { margin-bottom: 85px; }
+}
+
+  </style>
+
+  <!-- Three.js 3D Library with Multiple CDN Fallbacks -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    if (!window.THREE) {
+      document.write('<script src="https://unpkg.com/three@0.128.0/build/three.min.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+  <!-- 3D WebGL Canvas Layer -->
+  <div id="canvas-container"></div>
+
+  <!-- Interactive 2D Game UI Overlay -->
+  <div id="ui-root">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-family: 'Rajdhani', sans-serif;">
+      <h2 style="font-size: 2.4rem; color: #ffb300; margin-bottom: 8px;">🚜 INDIAN TRACTOR SIMULATOR 3D</h2>
+      <p style="color: #b0bec5; font-size: 1.1rem;">Starting Desi Agricultural Simulator...</p>
+    </div>
+  </div>
+
+  <!-- Inline All Game Code (Audio, Physics, Models, World, Missions, UI, Engine) -->
+  <script>
+/**
+ * INDIAN TRACTOR SIMULATOR 3D — UNIFIED BUNDLE
+ * Works on both http://localhost and direct file:// protocol
+ */
+(function() {
+  "use strict";
+
+  // ==========================================
+  // MODULE: audio.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - Procedural Web Audio Engine
+ * Pure Web Audio API synthesis: zero external audio files needed.
+ * Features realistic diesel tractor engine simulation, Punjabi pressure horn,
+ * hydraulic hitch effects, ambient village environment, and UI sounds.
+ */
+
+class AudioManager {
+  constructor() {
+    this.ctx = null;
+    this.initialized = false;
+    this.isMuted = false;
+
+    // Volume channels
+    this.volumes = {
+      master: 0.85,
+      engine: 0.8,
+      ambient: 0.5,
+      effects: 0.9,
+      ui: 0.7
+    };
+
+    // Gain nodes
+    this.masterGain = null;
+    this.engineGain = null;
+    this.ambientGain = null;
+    this.effectsGain = null;
+    this.uiGain = null;
+
+    // Engine synth state
+    this.engineRunning = false;
+    this.engineOsc1 = null;
+    this.engineOsc2 = null;
+    this.engineSubOsc = null;
+    this.engineFilter = null;
+    this.engineDistortion = null;
+    this.currentRPM = 750;
+    this.targetRPM = 750;
+    this.engineLoad = 0;
+
+    // Horn state
+    this.hornOsc1 = null;
+    this.hornOsc2 = null;
+    this.hornGain = null;
+    this.isHonking = false;
+
+    // Ambient loop nodes
+    this.ambientSource = null;
+    this.rainGain = null;
+    this.rainNoise = null;
+  }
+
+  init() {
+    if (this.initialized) return;
+
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      this.ctx = new AudioCtx();
+
+      // Master bus
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.volumes.master, this.ctx.currentTime);
+      this.masterGain.connect(this.ctx.destination);
+
+      // Channel busses
+      this.engineGain = this.ctx.createGain();
+      this.engineGain.gain.setValueAtTime(this.volumes.engine, this.ctx.currentTime);
+      this.engineGain.connect(this.masterGain);
+
+      this.ambientGain = this.ctx.createGain();
+      this.ambientGain.gain.setValueAtTime(this.volumes.ambient, this.ctx.currentTime);
+      this.ambientGain.connect(this.masterGain);
+
+      this.effectsGain = this.ctx.createGain();
+      this.effectsGain.gain.setValueAtTime(this.volumes.effects, this.ctx.currentTime);
+      this.effectsGain.connect(this.masterGain);
+
+      this.uiGain = this.ctx.createGain();
+      this.uiGain.gain.setValueAtTime(this.volumes.ui, this.ctx.currentTime);
+      this.uiGain.connect(this.masterGain);
+
+      this.initialized = true;
+      this.startAmbient();
+    } catch (e) {
+      console.warn('Web Audio init error:', e);
+    }
+  }
+
+  resume() {
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  setVolume(channel, val) {
+    val = Math.max(0, Math.min(1, val));
+    this.volumes[channel] = val;
+    if (this.isMuted) return;
+
+    const t = this.ctx ? this.ctx.currentTime : 0;
+    if (channel === 'master' && this.masterGain) this.masterGain.gain.linearRampToValueAtTime(val, t + 0.05);
+    if (channel === 'engine' && this.engineGain) this.engineGain.gain.linearRampToValueAtTime(val, t + 0.05);
+    if (channel === 'ambient' && this.ambientGain) this.ambientGain.gain.linearRampToValueAtTime(val, t + 0.05);
+    if (channel === 'effects' && this.effectsGain) this.effectsGain.gain.linearRampToValueAtTime(val, t + 0.05);
+    if (channel === 'ui' && this.uiGain) this.uiGain.gain.linearRampToValueAtTime(val, t + 0.05);
+  }
+
+  setMute(mute) {
+    this.isMuted = mute;
+    if (!this.masterGain || !this.ctx) return;
+    this.masterGain.gain.linearRampToValueAtTime(mute ? 0 : this.volumes.master, this.ctx.currentTime + 0.05);
+  }
+
+  // ==========================================
+  // DIESEL TRACTOR ENGINE SOUND SYNTHESIS
+  // ==========================================
+
+  startEngine() {
+    if (!this.initialized) this.init();
+    if (!this.ctx || this.engineRunning) return;
+    this.resume();
+
+    const t = this.ctx.currentTime;
+
+    // Cranking sound burst
+    this.playCrankingSound();
+
+    setTimeout(() => {
+      if (!this.ctx) return;
+      this.engineRunning = true;
+
+      // 1. Primary cylinder firing oscillator (sawtooth for rich harmonics)
+      this.engineOsc1 = this.ctx.createOscillator();
+      this.engineOsc1.type = 'sawtooth';
+      this.engineOsc1.frequency.setValueAtTime(26, this.ctx.currentTime); // ~750 RPM fundamental
+
+      // 2. Secondary harmonic oscillator (triangle for low thud)
+      this.engineOsc2 = this.ctx.createOscillator();
+      this.engineOsc2.type = 'triangle';
+      this.engineOsc2.frequency.setValueAtTime(52, this.ctx.currentTime);
+
+      // 3. Sub-bass diesel thump oscillator
+      this.engineSubOsc = this.ctx.createOscillator();
+      this.engineSubOsc.type = 'sine';
+      this.engineSubOsc.frequency.setValueAtTime(13, this.ctx.currentTime);
+
+      // Wave shaper for diesel combustion grit
+      this.engineDistortion = this.ctx.createWaveShaper();
+      this.engineDistortion.curve = this.makeDistortionCurve(20);
+
+      // Resonant low-pass filter
+      this.engineFilter = this.ctx.createBiquadFilter();
+      this.engineFilter.type = 'lowpass';
+      this.engineFilter.frequency.setValueAtTime(180, this.ctx.currentTime);
+      this.engineFilter.Q.setValueAtTime(4.0, this.ctx.currentTime);
+
+      // Connect nodes
+      this.engineOsc1.connect(this.engineDistortion);
+      this.engineOsc2.connect(this.engineDistortion);
+      this.engineSubOsc.connect(this.engineFilter);
+      this.engineDistortion.connect(this.engineFilter);
+
+      this.engineFilter.connect(this.engineGain);
+
+      this.engineOsc1.start();
+      this.engineOsc2.start();
+      this.engineSubOsc.start();
+    }, 450);
+  }
+
+  playCrankingSound() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(14, t);
+    osc.frequency.linearRampToValueAtTime(22, t + 0.4);
+
+    gain.gain.setValueAtTime(0.4, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.45);
+
+    osc.connect(gain);
+    gain.connect(this.effectsGain);
+
+    osc.start(t);
+    osc.stop(t + 0.45);
+  }
+
+  stopEngine() {
+    if (!this.engineRunning || !this.ctx) return;
+    this.engineRunning = false;
+
+    const t = this.ctx.currentTime;
+    if (this.engineOsc1) {
+      this.engineOsc1.frequency.exponentialRampToValueAtTime(8, t + 0.4);
+      this.engineOsc1.stop(t + 0.45);
+    }
+    if (this.engineOsc2) {
+      this.engineOsc2.frequency.exponentialRampToValueAtTime(16, t + 0.4);
+      this.engineOsc2.stop(t + 0.45);
+    }
+    if (this.engineSubOsc) {
+      this.engineSubOsc.stop(t + 0.45);
+    }
+
+    // Engine shut-down hiss/sputter
+    setTimeout(() => {
+      this.engineOsc1 = null;
+      this.engineOsc2 = null;
+      this.engineSubOsc = null;
+      this.engineFilter = null;
+      this.engineDistortion = null;
+    }, 500);
+  }
+
+  updateEngine(rpm, load = 0) {
+    if (!this.engineRunning || !this.ctx || !this.engineOsc1) return;
+
+    this.currentRPM = rpm;
+    this.engineLoad = load;
+
+    // RPM 700 -> 2400 maps to firing frequency 22Hz -> 76Hz
+    const baseFreq = (rpm / 60) * 1.8;
+    const t = this.ctx.currentTime;
+
+    this.engineOsc1.frequency.setTargetAtTime(baseFreq, t, 0.05);
+    this.engineOsc2.frequency.setTargetAtTime(baseFreq * 2, t, 0.05);
+    this.engineSubOsc.frequency.setTargetAtTime(baseFreq * 0.5, t, 0.05);
+
+    // Filter cut-off opens with RPM and throttle load
+    const filterFreq = 160 + (rpm - 700) * 0.45 + load * 220;
+    this.engineFilter.frequency.setTargetAtTime(Math.min(1800, filterFreq), t, 0.06);
+
+    // Subtle load distortion & gain bump
+    const loadGain = 0.7 + (rpm / 2400) * 0.35 + load * 0.25;
+    this.engineGain.gain.setTargetAtTime(loadGain * this.volumes.engine, t, 0.05);
+  }
+
+  makeDistortionCurve(amount) {
+    const k = amount;
+    const n = 44100;
+    const curve = new Float32Array(n);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < n; ++i) {
+      const x = (i * 2) / n - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  // ==========================================
+  // INDIAN PRESSURE HORN (PUNJABI STYLE)
+  // ==========================================
+
+  startHorn(style = 'punjabi') {
+    if (!this.initialized) this.init();
+    if (!this.ctx || this.isHonking) return;
+    this.resume();
+
+    this.isHonking = true;
+    const t = this.ctx.currentTime;
+
+    this.hornOsc1 = this.ctx.createOscillator();
+    this.hornOsc2 = this.ctx.createOscillator();
+    this.hornGain = this.ctx.createGain();
+
+    // Dual-tone harmonic brass frequencies (authentic Indian dual trumpet horn)
+    if (style === 'punjabi') {
+      this.hornOsc1.type = 'sawtooth';
+      this.hornOsc2.type = 'sawtooth';
+      this.hornOsc1.frequency.setValueAtTime(420, t); // G#4
+      this.hornOsc2.frequency.setValueAtTime(525, t); // C5
+      // Slight vibrato
+      this.hornOsc1.frequency.linearRampToValueAtTime(440, t + 0.15);
+      this.hornOsc2.frequency.linearRampToValueAtTime(550, t + 0.15);
+    } else {
+      // Standard electric farm horn
+      this.hornOsc1.type = 'square';
+      this.hornOsc2.type = 'sawtooth';
+      this.hornOsc1.frequency.setValueAtTime(370, t);
+      this.hornOsc2.frequency.setValueAtTime(460, t);
+    }
+
+    // Resonant bandpass for trumpet bell resonance
+    const hornFilter = this.ctx.createBiquadFilter();
+    hornFilter.type = 'bandpass';
+    hornFilter.frequency.setValueAtTime(950, t);
+    hornFilter.Q.setValueAtTime(2.2, t);
+
+    this.hornGain.gain.setValueAtTime(0, t);
+    this.hornGain.gain.linearRampToValueAtTime(0.85, t + 0.04);
+
+    this.hornOsc1.connect(hornFilter);
+    this.hornOsc2.connect(hornFilter);
+    hornFilter.connect(this.hornGain);
+    this.hornGain.connect(this.effectsGain);
+
+    this.hornOsc1.start(t);
+    this.hornOsc2.start(t);
+  }
+
+  stopHorn() {
+    if (!this.isHonking || !this.ctx || !this.hornGain) return;
+    const t = this.ctx.currentTime;
+    this.hornGain.gain.linearRampToValueAtTime(0, t + 0.06);
+
+    setTimeout(() => {
+      if (this.hornOsc1) {
+        this.hornOsc1.stop();
+        this.hornOsc1 = null;
+      }
+      if (this.hornOsc2) {
+        this.hornOsc2.stop();
+        this.hornOsc2 = null;
+      }
+      this.hornGain = null;
+      this.isHonking = false;
+    }, 70);
+  }
+
+  // ==========================================
+  // MECHANICAL & FARMING SOUND EFFECTS
+  // ==========================================
+
+  playGearShift() {
+    if (!this.initialized || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(160, t);
+    osc.frequency.exponentialRampToValueAtTime(70, t + 0.09);
+
+    gain.gain.setValueAtTime(0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+
+    osc.connect(gain);
+    gain.connect(this.effectsGain);
+    osc.start(t);
+    osc.stop(t + 0.1);
+  }
+
+  playHitchSound(attach = true) {
+    if (!this.initialized || !this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    // Metallic heavy clank
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(attach ? 280 : 360, t);
+    osc.frequency.exponentialRampToValueAtTime(attach ? 80 : 120, t + 0.18);
+
+    gain.gain.setValueAtTime(0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+
+    osc.connect(gain);
+    gain.connect(this.effectsGain);
+    osc.start(t);
+    osc.stop(t + 0.22);
+  }
+
+  playBrakeSqueal() {
+    if (!this.initialized || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(2200, t);
+    osc.frequency.linearRampToValueAtTime(1800, t + 0.25);
+
+    gain.gain.setValueAtTime(0.15, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+
+    osc.connect(gain);
+    gain.connect(this.effectsGain);
+    osc.start(t);
+    osc.stop(t + 0.27);
+  }
+
+  playTireDirtRoll(speed) {
+    // Speed-dependent rumble
+    if (!this.initialized || !this.ctx || speed < 1) return;
+    // handled dynamically in physics loop
+  }
+
+  // ==========================================
+  // AMBIENT VILLAGE & WEATHER SOUNDS
+  // ==========================================
+
+  startAmbient() {
+    if (!this.ctx) return;
+
+    // Procedural rural wind & soft foliage rustle
+    const bufferSize = this.ctx.sampleRate * 2;
+    const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1;
+    }
+
+    const whiteNoise = this.ctx.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
+    whiteNoise.loop = true;
+
+    // Filter to soft warm village breeze
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(320, this.ctx.currentTime);
+    filter.Q.setValueAtTime(0.7, this.ctx.currentTime);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+
+    whiteNoise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ambientGain);
+
+    whiteNoise.start();
+  }
+
+  setRainSound(isRaining) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+
+    if (isRaining && !this.rainNoise) {
+      const bufferSize = this.ctx.sampleRate * 2;
+      const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = (Math.random() * 2 - 1) * 0.8;
+      }
+
+      this.rainNoise = this.ctx.createBufferSource();
+      this.rainNoise.buffer = noiseBuffer;
+      this.rainNoise.loop = true;
+
+      const rainFilter = this.ctx.createBiquadFilter();
+      rainFilter.type = 'lowpass';
+      rainFilter.frequency.setValueAtTime(1100, t);
+
+      this.rainGain = this.ctx.createGain();
+      this.rainGain.gain.setValueAtTime(0, t);
+      this.rainGain.gain.linearRampToValueAtTime(0.4, t + 1.0);
+
+      this.rainNoise.connect(rainFilter);
+      rainFilter.connect(this.rainGain);
+      this.rainGain.connect(this.ambientGain);
+
+      this.rainNoise.start();
+    } else if (!isRaining && this.rainGain) {
+      this.rainGain.gain.linearRampToValueAtTime(0, t + 1.0);
+      setTimeout(() => {
+        if (this.rainNoise) {
+          this.rainNoise.stop();
+          this.rainNoise = null;
+          this.rainGain = null;
+        }
+      }, 1050);
+    }
+  }
+
+  playVillageBirdChirp() {
+    if (!this.ctx || this.isMuted) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(2600, t);
+    osc.frequency.exponentialRampToValueAtTime(4200, t + 0.08);
+    osc.frequency.exponentialRampToValueAtTime(3100, t + 0.16);
+
+    gain.gain.setValueAtTime(0.08, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+
+    osc.connect(gain);
+    gain.connect(this.ambientGain);
+    osc.start(t);
+    osc.stop(t + 0.19);
+  }
+
+  // ==========================================
+  // UI & MISSION FANFARE SOUNDS
+  // ==========================================
+
+  playUIClick() {
+    if (!this.initialized) this.init();
+    if (!this.ctx || this.isMuted) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(580, t);
+    osc.frequency.exponentialRampToValueAtTime(280, t + 0.05);
+
+    gain.gain.setValueAtTime(0.3, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.06);
+
+    osc.connect(gain);
+    gain.connect(this.uiGain);
+    osc.start(t);
+    osc.stop(t + 0.06);
+  }
+
+  playMissionSuccess() {
+    if (!this.initialized) this.init();
+    if (!this.ctx || this.isMuted) return;
+
+    // Victory fanfare notes: C5, E5, G5, C6 (classic reward chord)
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, idx) => {
+      const t = this.ctx.currentTime + idx * 0.12;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.4, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+
+      osc.connect(gain);
+      gain.connect(this.uiGain);
+      osc.start(t);
+      osc.stop(t + 0.5);
+    });
+  }
+}
+
+
+  // ==========================================
+  // MODULE: physics.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - Vehicle Physics & Trailer Articulation Engine
+ * Provides stable, realistic, responsive tractor driving physics,
+ * surface-dependent friction, gear ratios, speed-sensitive steering,
+ * articulated trailer towing mechanics, and tractor recovery.
+ */
+
+class VehiclePhysics {
+  constructor() {
+    // Position & Orientation
+    this.x = 0;
+    this.y = 0.9; // ground clearance
+    this.z = 0;
+    this.heading = 0; // Yaw angle in radians (0 = along +Z or -Z)
+    this.pitch = 0;
+    this.roll = 0;
+
+    // Velocities
+    this.speed = 0; // m/s
+    this.angularVelocity = 0;
+    this.wheelSpeed = 0;
+
+    // Steering
+    this.steerAngle = 0; // radians (-0.6 to +0.6)
+    this.targetSteerAngle = 0;
+    this.maxSteerAngle = 0.58; // ~33 degrees
+    this.steerSpeed = 2.8;
+
+    // Engine & Transmission
+    this.engineOn = true;
+    this.currentGear = 1; // 1, 2, 3, 4, -1 (Reverse), 0 (Neutral)
+    this.gearRatios = {
+      '-1': -4.2, // Reverse
+      '0': 0,     // Neutral
+      '1': 6.5,   // Heavy low gear (tilling / pulling)
+      '2': 4.2,   // Farm work gear
+      '3': 2.8,   // Road transit
+      '4': 1.8    // Highway cruising (top speed ~36 km/h)
+    };
+    this.gearMaxSpeeds = {
+      '-1': 3.2,  // ~11 km/h
+      '0': 0,
+      '1': 3.0,   // ~10 km/h
+      '2': 5.5,   // ~20 km/h
+      '3': 7.5,   // ~27 km/h
+      '4': 10.2   // ~36.7 km/h
+    };
+    this.rpm = 750;
+    this.idleRPM = 750;
+    this.maxRPM = 2400;
+    this.throttle = 0;
+    this.brake = 0;
+    this.handbrake = false;
+
+    // Surface detection & friction
+    this.currentSurface = 'road'; // 'road', 'dirt', 'mud', 'grass', 'field'
+    this.surfaceGrip = 1.0;
+    this.surfaceResistance = 1.0;
+
+    // Tractor Dimensions
+    this.wheelbase = 2.2; // distance between front and rear axle
+    this.frontTrack = 1.4;
+    this.rearTrack = 1.6;
+    this.frontWheelRadius = 0.45;
+    this.rearWheelRadius = 0.78;
+
+    // Wheel rotation state for visual meshes
+    this.frontWheelRotation = 0;
+    this.rearWheelRotation = 0;
+    this.steeringWheelRotation = 0;
+
+    // Hitch point relative to tractor center (rear hitch)
+    this.hitchOffset = -1.65; // 1.65m behind tractor center
+
+    // Trailer / Trolley Articulation
+    this.trolleyAttached = false;
+    this.trolleyX = 0;
+    this.trolleyY = 0.85;
+    this.trolleyZ = 0;
+    this.trolleyHeading = 0;
+    this.trolleyDrawbarLength = 2.4; // Distance from tractor hitch to trolley axle
+    this.trolleyWheelRadius = 0.55;
+    this.trolleyWheelRotation = 0;
+    this.trolleyCargoCount = 0; // Wheat bags or sugarcane
+    this.trolleyMaxCargo = 10;
+    this.trolleyTippingProgress = 0; // 0 to 1 for tipping unload animation
+
+    // Farming Implement (Cultivator / Plough)
+    this.implementAttached = null; // 'cultivator', 'plough', 'seed_drill'
+    this.implementLowered = false; // Raised (transport) vs Lowered (working)
+    this.implementProgress = 0; // 0 (up) to 1 (down)
+
+    // Boundaries & Ground collision
+    this.worldBounds = 280; // 560m x 560m world
+  }
+
+  reset(x = 0, z = 0, heading = 0) {
+    this.x = x;
+    this.y = 0.9;
+    this.z = z;
+    this.heading = heading;
+    this.pitch = 0;
+    this.roll = 0;
+    this.speed = 0;
+    this.angularVelocity = 0;
+    this.steerAngle = 0;
+    this.targetSteerAngle = 0;
+    this.rpm = this.idleRPM;
+    this.handbrake = false;
+
+    if (this.trolleyAttached) {
+      // Position trolley directly behind tractor
+      const hitchX = this.x - Math.sin(this.heading) * this.hitchOffset;
+      const hitchZ = this.z - Math.cos(this.heading) * this.hitchOffset;
+      this.trolleyHeading = this.heading;
+      this.trolleyX = hitchX - Math.sin(this.trolleyHeading) * this.trolleyDrawbarLength;
+      this.trolleyZ = hitchZ - Math.cos(this.trolleyHeading) * this.trolleyDrawbarLength;
+    }
+  }
+
+  update(dt, inputs, getTerrainHeight, getSurfaceType) {
+    if (dt > 0.1) dt = 0.1; // clamp delta to prevent physics explosion
+
+    // 1. Process Inputs
+    this.throttle = inputs.accelerate ? 1 : 0;
+    this.brake = inputs.brake ? 1 : 0;
+    this.handbrake = !!inputs.handbrake;
+
+    // Steering input with speed dampening
+    let steerDir = 0;
+    if (inputs.steerLeft) steerDir += 1;
+    if (inputs.steerRight) steerDir -= 1;
+    if (inputs.steeringSlider !== undefined) {
+      steerDir = inputs.steeringSlider; // analog control (-1 to +1)
+    }
+
+    // High speed reduces maximum steering sensitivity for stability
+    const speedRatio = Math.min(1, Math.abs(this.speed) / 8.0);
+    const effectiveMaxSteer = this.maxSteerAngle * (1.0 - speedRatio * 0.42);
+
+    this.targetSteerAngle = steerDir * effectiveMaxSteer;
+
+    // Smooth steering interpolation
+    const steerStep = this.steerSpeed * dt;
+    if (this.steerAngle < this.targetSteerAngle) {
+      this.steerAngle = Math.min(this.targetSteerAngle, this.steerAngle + steerStep);
+    } else if (this.steerAngle > this.targetSteerAngle) {
+      this.steerAngle = Math.max(this.targetSteerAngle, this.steerAngle - steerStep);
+    }
+
+    this.steeringWheelRotation = this.steerAngle * 4.2; // ~2.5 turns
+
+    // 2. Surface Properties
+    if (getSurfaceType) {
+      this.currentSurface = getSurfaceType(this.x, this.z);
+    }
+    this.updateSurfacePhysics();
+
+    // 3. Implement Resistance
+    let implementDrag = 0;
+    if (this.implementAttached && this.implementLowered) {
+      implementDrag = 0.35; // Cultivating soil creates realistic engine drag
+      this.implementProgress = Math.min(1, this.implementProgress + dt * 2.5);
+    } else {
+      this.implementProgress = Math.max(0, this.implementProgress - dt * 2.5);
+    }
+
+    // 4. Cargo Weight Influence
+    const cargoWeightFactor = 1.0 + (this.trolleyAttached ? 0.3 + (this.trolleyCargoCount / this.trolleyMaxCargo) * 0.45 : 0);
+
+    // 5. Automatic Gear Selection & RPM calculation
+    if (this.engineOn) {
+      if (this.brake > 0 && this.speed <= 0.1) {
+        // Shift to Reverse if stopped and holding brake
+        this.currentGear = -1;
+      } else if (this.throttle > 0 && this.currentGear === -1 && this.speed >= -0.1) {
+        this.currentGear = 1;
+      } else if (this.currentGear > 0) {
+        // Auto forward shifting based on speed
+        const absSpd = Math.abs(this.speed);
+        if (absSpd > 7.0) this.currentGear = 4;
+        else if (absSpd > 4.5) this.currentGear = 3;
+        else if (absSpd > 2.2) this.currentGear = 2;
+        else this.currentGear = 1;
+      }
+    } else {
+      this.currentGear = 0;
+    }
+
+    // 6. Acceleration and Braking Forces
+    let driveForce = 0;
+    const maxSpeed = this.gearMaxSpeeds[this.currentGear] || 0;
+
+    if (this.engineOn) {
+      if (this.currentGear > 0 && this.throttle > 0) {
+        // Forward drive
+        const torque = (1.0 - Math.abs(this.speed) / maxSpeed) * 3.8;
+        driveForce = Math.max(0, torque) * this.surfaceGrip / cargoWeightFactor;
+      } else if (this.currentGear === -1 && this.brake > 0) {
+        // Reverse drive
+        const torque = (1.0 - Math.abs(this.speed) / maxSpeed) * 2.8;
+        driveForce = -Math.max(0, torque) * this.surfaceGrip / cargoWeightFactor;
+      }
+    }
+
+    // Braking force
+    let brakingForce = 0;
+    if (this.currentGear > 0 && this.brake > 0) {
+      brakingForce = 7.5; // active foot brake
+    } else if (this.currentGear === -1 && this.throttle > 0) {
+      brakingForce = 7.5; // braking while reversing
+    }
+    if (this.handbrake) {
+      brakingForce += 12.0; // strong handbrake lock
+    }
+
+    // Rolling friction & aerodynamic / soil drag
+    const rollingResistance = (0.45 * this.surfaceResistance + implementDrag) * (this.speed > 0 ? 1 : (this.speed < 0 ? -1 : 0));
+
+    // Net acceleration
+    let accel = driveForce;
+    if (Math.abs(this.speed) > 0.05) {
+      const brakeDecel = (brakingForce + Math.abs(rollingResistance)) * Math.sign(this.speed);
+      accel -= brakeDecel;
+    } else if (driveForce === 0) {
+      this.speed = 0;
+      accel = 0;
+    }
+
+    this.speed += accel * dt;
+
+    // Clamp speed to gear limits
+    if (this.currentGear > 0) {
+      this.speed = Math.max(0, Math.min(maxSpeed, this.speed));
+    } else if (this.currentGear === -1) {
+      this.speed = Math.max(-maxSpeed, Math.min(0, this.speed));
+    } else {
+      // Natural coasting
+      this.speed *= Math.max(0, 1 - dt * 1.5);
+    }
+
+    // RPM Dynamics
+    if (!this.engineOn) {
+      this.rpm = Math.max(0, this.rpm - dt * 900);
+    } else {
+      const targetRPM = this.idleRPM + (Math.abs(this.speed) / (maxSpeed || 1)) * 1400 + (this.throttle > 0 ? 350 : 0);
+      this.rpm += (targetRPM - this.rpm) * Math.min(1, dt * 6.0);
+      this.rpm = Math.max(this.idleRPM, Math.min(this.maxRPM, this.rpm));
+    }
+
+    // 7. Steering & Bicycle Model Heading Update
+    if (Math.abs(this.speed) > 0.01) {
+      // Turning radius R = wheelbase / tan(steerAngle)
+      // Angular velocity omega = (speed / wheelbase) * tan(steerAngle)
+      const angularVel = (this.speed / this.wheelbase) * Math.tan(this.steerAngle);
+      this.heading += angularVel * dt;
+
+      // Integrate world position
+      this.x += Math.sin(this.heading) * this.speed * dt;
+      this.z += Math.cos(this.heading) * this.speed * dt;
+    }
+
+    // Clamp to world boundaries
+    this.x = Math.max(-this.worldBounds, Math.min(this.worldBounds, this.x));
+    this.z = Math.max(-this.worldBounds, Math.min(this.worldBounds, this.z));
+
+    // Terrain height sampling & suspension tilt
+    if (getTerrainHeight) {
+      const groundY = getTerrainHeight(this.x, this.z);
+      this.y = groundY + 0.88;
+
+      // Sample points ahead and behind to estimate pitch
+      const frontX = this.x + Math.sin(this.heading) * (this.wheelbase * 0.5);
+      const frontZ = this.z + Math.cos(this.heading) * (this.wheelbase * 0.5);
+      const rearX = this.x - Math.sin(this.heading) * (this.wheelbase * 0.5);
+      const rearZ = this.z - Math.cos(this.heading) * (this.wheelbase * 0.5);
+
+      const frontH = getTerrainHeight(frontX, frontZ);
+      const rearH = getTerrainHeight(rearX, rearZ);
+      const targetPitch = Math.atan2(frontH - rearH, this.wheelbase);
+      this.pitch += (targetPitch - this.pitch) * Math.min(1, dt * 8.0);
+    }
+
+    // 8. Visual Wheel Rotation
+    const travelDist = this.speed * dt;
+    this.frontWheelRotation += travelDist / this.frontWheelRadius;
+    this.rearWheelRotation += travelDist / this.rearWheelRadius;
+
+    // 9. Articulated Trolley Dynamics
+    if (this.trolleyAttached) {
+      this.updateTrolleyPhysics(dt, getTerrainHeight);
+    }
+  }
+
+  updateSurfacePhysics() {
+    switch (this.currentSurface) {
+      case 'road':
+        this.surfaceGrip = 1.0;
+        this.surfaceResistance = 0.35;
+        break;
+      case 'dirt':
+        this.surfaceGrip = 0.82;
+        this.surfaceResistance = 0.65;
+        break;
+      case 'mud':
+        this.surfaceGrip = 0.48;
+        this.surfaceResistance = 1.8;
+        break;
+      case 'field':
+        this.surfaceGrip = 0.68;
+        this.surfaceResistance = 1.25;
+        break;
+      case 'grass':
+      default:
+        this.surfaceGrip = 0.75;
+        this.surfaceResistance = 0.75;
+        break;
+    }
+  }
+
+  updateTrolleyPhysics(dt, getTerrainHeight) {
+    // Exact rear hitch location in world space
+    const hitchX = this.x - Math.sin(this.heading) * this.hitchOffset;
+    const hitchZ = this.z - Math.cos(this.heading) * this.hitchOffset;
+
+    // Vector from trolley axle to tractor hitch
+    const dx = hitchX - this.trolleyX;
+    const dz = hitchZ - this.trolleyZ;
+    const dist = Math.hypot(dx, dz);
+
+    if (dist > 0.001) {
+      // Target angle points directly towards the hitch pin
+      const targetHeading = Math.atan2(dx, dz);
+
+      // Smooth trailer rotational lag
+      let diff = targetHeading - this.trolleyHeading;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+
+      // Realistic articulation stiffness
+      const turnRate = Math.min(1, Math.max(0.15, Math.abs(this.speed) * 0.45));
+      this.trolleyHeading += diff * Math.min(1, dt * 8.0 * turnRate);
+
+      // Distance constraint: keep trolley center exactly at drawbar distance behind hitch
+      this.trolleyX = hitchX - Math.sin(this.trolleyHeading) * this.trolleyDrawbarLength;
+      this.trolleyZ = hitchZ - Math.cos(this.trolleyHeading) * this.trolleyDrawbarLength;
+    }
+
+    if (getTerrainHeight) {
+      this.trolleyY = getTerrainHeight(this.trolleyX, this.trolleyZ) + 0.85;
+    }
+
+    // Trolley wheel rotation
+    this.trolleyWheelRotation += (this.speed * dt) / this.trolleyWheelRadius;
+  }
+
+  attachTrolley() {
+    this.trolleyAttached = true;
+    const hitchX = this.x - Math.sin(this.heading) * this.hitchOffset;
+    const hitchZ = this.z - Math.cos(this.heading) * this.hitchOffset;
+    this.trolleyHeading = this.heading;
+    this.trolleyX = hitchX - Math.sin(this.trolleyHeading) * this.trolleyDrawbarLength;
+    this.trolleyZ = hitchZ - Math.cos(this.trolleyHeading) * this.trolleyDrawbarLength;
+  }
+
+  detachTrolley() {
+    this.trolleyAttached = false;
+  }
+
+  toggleEquipmentLower() {
+    if (this.implementAttached) {
+      this.implementLowered = !this.implementLowered;
+      return this.implementLowered;
+    }
+    return false;
+  }
+}
+
+
+  // ==========================================
+  // MODULE: models.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - Procedural 3D Vehicle & Equipment Models
+ * Built with Three.js primitives and PBR materials.
+ * Features 3 authentic Indian tractor designs, detailed agricultural trolley (Desi Traali),
+ * and functional farming implements (Cultivator, Plough, Seed Drill).
+ */
+
+class ModelFactory {
+  constructor(THREE) {
+    this.THREE = THREE;
+
+    // Cache common materials
+    this.materials = {
+      rubber: new THREE.MeshStandardMaterial({ color: 0x181818, roughness: 0.85, metalness: 0.1 }),
+      tread: new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9, metalness: 0.05 }),
+      rimWhite: new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.4, metalness: 0.4 }),
+      rimYellow: new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.35, metalness: 0.5 }),
+      rimChrome: new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.15, metalness: 0.9 }),
+      rimRed: new THREE.MeshStandardMaterial({ color: 0xb71c1c, roughness: 0.4, metalness: 0.4 }),
+      chrome: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.95 }),
+      ironDark: new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.7, metalness: 0.6 }),
+      seatLeather: new THREE.MeshStandardMaterial({ color: 0x1e1b18, roughness: 0.65, metalness: 0.1 }),
+      headlightGlass: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.85 }),
+      headlightOn: new THREE.MeshBasicMaterial({ color: 0xfffae0 }),
+      taillightOff: new THREE.MeshStandardMaterial({ color: 0x4a0a0a, roughness: 0.4 }),
+      taillightOn: new THREE.MeshBasicMaterial({ color: 0xff1a1a }),
+      trolleyWood: new THREE.MeshStandardMaterial({ color: 0x8d5b2d, roughness: 0.8, metalness: 0.05 }),
+      trolleyPaintBlue: new THREE.MeshStandardMaterial({ color: 0x1976d2, roughness: 0.5, metalness: 0.2 }),
+      trolleyChassis: new THREE.MeshStandardMaterial({ color: 0x212121, roughness: 0.7, metalness: 0.5 }),
+      juteSack: new THREE.MeshStandardMaterial({ color: 0xc4a375, roughness: 0.9, metalness: 0.0 }),
+      sugarcane: new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.7, metalness: 0.1 }),
+      implementSteel: new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.5, metalness: 0.7 })
+    };
+  }
+
+  // ==========================================
+  // INDIAN TRACTOR BUILDER
+  // ==========================================
+
+  createTractor(type = 'sher855', customColor = null, customRim = null) {
+    const THREE = this.THREE;
+    const root = new THREE.Group();
+
+    // Tractor styling configurations
+    const configs = {
+      sher855: {
+        name: 'Desi Sher 855',
+        bodyColor: customColor || 0x0d47a1, // Swaraj Blue
+        fenderColor: 0xffffff,
+        rimColor: customRim || 0xeeeeee,
+        hoodLength: 1.9,
+        hoodWidth: 0.92,
+        hoodHeight: 0.82,
+        exhaustType: 'tall_chrome',
+        canopy: true,
+        bumperWeight: true
+      },
+      samrat575: {
+        name: 'Kisan Samrat 575',
+        bodyColor: customColor || 0xc62828, // Mahindra Red
+        fenderColor: customColor || 0xc62828,
+        rimColor: customRim || 0xffd54f, // Yellow
+        hoodLength: 1.85,
+        hoodWidth: 0.88,
+        hoodHeight: 0.78,
+        exhaustType: 'black_side',
+        canopy: true,
+        bumperWeight: true
+      },
+      raftaar5050: {
+        name: 'Raftaar 5050',
+        bodyColor: customColor || 0x2e7d32, // Punjab Green
+        fenderColor: customColor || 0x2e7d32,
+        rimColor: customRim || 0xffeb3b, // Golden Yellow
+        hoodLength: 1.95,
+        hoodWidth: 0.94,
+        hoodHeight: 0.85,
+        exhaustType: 'sport_curve',
+        canopy: false,
+        bumperWeight: true
+      }
+    };
+
+    const cfg = configs[type] || configs.sher855;
+
+    // Body paint material
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: cfg.bodyColor,
+      roughness: 0.35,
+      metalness: 0.5
+    });
+
+    const fenderMat = new THREE.MeshStandardMaterial({
+      color: cfg.fenderColor,
+      roughness: 0.35,
+      metalness: 0.5
+    });
+
+    const rimMat = new THREE.MeshStandardMaterial({
+      color: cfg.rimColor,
+      roughness: 0.35,
+      metalness: 0.6
+    });
+
+    // 1. Chassis & Cast Iron Transmission Block
+    const chassisGeo = new THREE.BoxGeometry(0.75, 0.45, 2.5);
+    const chassis = new THREE.Mesh(chassisGeo, this.materials.ironDark);
+    chassis.position.set(0, 0, 0);
+    chassis.castShadow = true;
+    root.add(chassis);
+
+    // Front Axle Bar
+    const frontAxleGeo = new THREE.BoxGeometry(1.4, 0.14, 0.16);
+    const frontAxle = new THREE.Mesh(frontAxleGeo, this.materials.ironDark);
+    frontAxle.position.set(0, -0.12, 1.15);
+    frontAxle.castShadow = true;
+    root.add(frontAxle);
+
+    // Rear Axle Trumpet Housings
+    const rearAxleGeo = new THREE.CylinderGeometry(0.12, 0.15, 1.62, 12);
+    rearAxleGeo.rotateZ(Math.PI / 2);
+    const rearAxle = new THREE.Mesh(rearAxleGeo, this.materials.ironDark);
+    rearAxle.position.set(0, 0.05, -1.05);
+    rearAxle.castShadow = true;
+    root.add(rearAxle);
+
+    // 2. Engine Hood (Bonnet)
+    const hoodGroup = new THREE.Group();
+    const hoodGeo = new THREE.BoxGeometry(cfg.hoodWidth, cfg.hoodHeight, cfg.hoodLength);
+    const hood = new THREE.Mesh(hoodGeo, bodyMat);
+    hood.position.set(0, 0.55, 0.6);
+    hood.castShadow = true;
+    hoodGroup.add(hood);
+
+    // Radiator Grille
+    const grilleGeo = new THREE.BoxGeometry(cfg.hoodWidth * 0.88, cfg.hoodHeight * 0.78, 0.08);
+    const grilleMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8, metalness: 0.3 });
+    const grille = new THREE.Mesh(grilleGeo, grilleMat);
+    grille.position.set(0, 0.55, 0.6 + cfg.hoodLength * 0.5 + 0.02);
+    hoodGroup.add(grille);
+
+    // Chrome Emblem Badge
+    const badgeGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.04, 16);
+    badgeGeo.rotateX(Math.PI / 2);
+    const badge = new THREE.Mesh(badgeGeo, this.materials.chrome);
+    badge.position.set(0, 0.65, 0.6 + cfg.hoodLength * 0.5 + 0.06);
+    hoodGroup.add(badge);
+
+    // Side Ventilation Louvers (Indian tractor detailing)
+    const louverGeo = new THREE.BoxGeometry(0.02, 0.25, 0.6);
+    const leftLouver = new THREE.Mesh(louverGeo, this.materials.ironDark);
+    leftLouver.position.set(-cfg.hoodWidth * 0.5 - 0.005, 0.55, 0.65);
+    const rightLouver = leftLouver.clone();
+    rightLouver.position.x = cfg.hoodWidth * 0.5 + 0.005;
+    hoodGroup.add(leftLouver, rightLouver);
+
+    root.add(hoodGroup);
+
+    // 3. Heavy Front Iron Bumper Counterweight (Iconic Indian Tractor Bumper)
+    if (cfg.bumperWeight) {
+      const bumperGroup = new THREE.Group();
+      const bumperBarGeo = new THREE.BoxGeometry(1.3, 0.22, 0.25);
+      const bumperBar = new THREE.Mesh(bumperBarGeo, this.materials.ironDark);
+      bumperBar.position.set(0, 0.02, 1.78);
+      bumperBar.castShadow = true;
+      bumperGroup.add(bumperBar);
+
+      // Bull-bar upright loop
+      const bullBarGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.5, 10);
+      const leftBar = new THREE.Mesh(bullBarGeo, this.materials.chrome);
+      leftBar.position.set(-0.5, 0.28, 1.78);
+      const rightBar = leftBar.clone();
+      rightBar.position.x = 0.5;
+      const topBarGeo = new THREE.CylinderGeometry(0.035, 0.035, 1.05, 10);
+      topBarGeo.rotateZ(Math.PI / 2);
+      const topBar = new THREE.Mesh(topBarGeo, this.materials.chrome);
+      topBar.position.set(0, 0.52, 1.78);
+      bumperGroup.add(leftBar, rightBar, topBar);
+
+      // Tow pin
+      const towPinGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8);
+      const towPin = new THREE.Mesh(towPinGeo, this.materials.chrome);
+      towPin.position.set(0, 0.02, 1.92);
+      bumperGroup.add(towPin);
+
+      root.add(bumperGroup);
+    }
+
+    // 4. Exhaust Pipe Stack
+    const exhaustGroup = new THREE.Group();
+    const exhaustPipeGeo = new THREE.CylinderGeometry(0.045, 0.05, 1.1, 12);
+    const exhaustMat = cfg.exhaustType === 'tall_chrome' ? this.materials.chrome : this.materials.ironDark;
+    const exhaustPipe = new THREE.Mesh(exhaustPipeGeo, exhaustMat);
+    exhaustPipe.position.set(0.38, 1.35, 0.85);
+    exhaustPipe.castShadow = true;
+    exhaustGroup.add(exhaustPipe);
+
+    // Exhaust hinged rain cap (flapper)
+    const capGeo = new THREE.CylinderGeometry(0.055, 0.055, 0.015, 10);
+    const flapper = new THREE.Mesh(capGeo, this.materials.ironDark);
+    flapper.position.set(0.38, 1.9, 0.85);
+    flapper.rotation.z = 0.2;
+    exhaustGroup.add(flapper);
+
+    // Air Pre-cleaner intake canister (cyclone filter on opposite side)
+    const airFilterGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.35, 12);
+    const airFilter = new THREE.Mesh(airFilterGeo, this.materials.ironDark);
+    airFilter.position.set(-0.38, 1.25, 0.95);
+    const airBowlGeo = new THREE.SphereGeometry(0.095, 12, 10);
+    const bowlMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, transparent: true, opacity: 0.7 });
+    const airBowl = new THREE.Mesh(airBowlGeo, bowlMat);
+    airBowl.position.set(-0.38, 1.45, 0.95);
+    root.add(airFilter, airBowl);
+
+    root.add(exhaustGroup);
+
+    // 5. Headlights (Twin round bright chrome lights)
+    const headlightGroup = new THREE.Group();
+    const lightHousingGeo = new THREE.CylinderGeometry(0.12, 0.09, 0.14, 16);
+    lightHousingGeo.rotateX(Math.PI / 2);
+
+    const leftLight = new THREE.Mesh(lightHousingGeo, this.materials.chrome);
+    leftLight.position.set(-0.34, 0.75, 1.55);
+    const rightLight = leftLight.clone();
+    rightLight.position.x = 0.34;
+
+    const lensGeo = new THREE.CircleGeometry(0.11, 16);
+    const leftLens = new THREE.Mesh(lensGeo, this.materials.headlightGlass);
+    leftLens.position.set(-0.34, 0.75, 1.625);
+    const rightLens = leftLens.clone();
+    rightLens.position.x = 0.34;
+
+    headlightGroup.add(leftLight, rightLight, leftLens, rightLens);
+
+    // Active light spotlights
+    const leftSpot = new THREE.SpotLight(0xfffae0, 0, 45, Math.PI / 6, 0.3, 1.0);
+    leftSpot.position.set(-0.34, 0.75, 1.65);
+    leftSpot.target.position.set(-0.34, 0, 15);
+    const rightSpot = leftSpot.clone();
+    rightSpot.position.x = 0.34;
+    rightSpot.target.position.set(0.34, 0, 15);
+
+    headlightGroup.add(leftSpot, rightSpot);
+    headlightGroup.add(leftSpot.target, rightSpot.target);
+    root.add(headlightGroup);
+
+    // 6. Rear Tail Lights & Brake Lights
+    const taillightGroup = new THREE.Group();
+    const tailGeo = new THREE.BoxGeometry(0.12, 0.08, 0.05);
+    const leftTail = new THREE.Mesh(tailGeo, this.materials.taillightOff);
+    leftTail.position.set(-0.85, 0.95, -1.68);
+    const rightTail = leftTail.clone();
+    rightTail.position.x = 0.85;
+    taillightGroup.add(leftTail, rightTail);
+    root.add(taillightGroup);
+
+    // 7. Driver Cockpit & Controls
+    const cockpitGroup = new THREE.Group();
+
+    // Floor Platform
+    const floorGeo = new THREE.BoxGeometry(1.2, 0.08, 1.3);
+    const floor = new THREE.Mesh(floorGeo, this.materials.ironDark);
+    floor.position.set(0, 0.3, -0.6);
+    floor.castShadow = true;
+    cockpitGroup.add(floor);
+
+    // Sprung Deluxe Driver Seat
+    const seatBottomGeo = new THREE.BoxGeometry(0.52, 0.1, 0.48);
+    const seatBottom = new THREE.Mesh(seatBottomGeo, this.materials.seatLeather);
+    seatBottom.position.set(0, 0.8, -0.85);
+    const seatBackGeo = new THREE.BoxGeometry(0.5, 0.45, 0.08);
+    const seatBack = new THREE.Mesh(seatBackGeo, this.materials.seatLeather);
+    seatBack.position.set(0, 1.05, -1.08);
+    seatBack.rotation.x = -0.15;
+    const seatSpringGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.42, 8);
+    const seatSpring = new THREE.Mesh(seatSpringGeo, this.materials.ironDark);
+    seatSpring.position.set(0, 0.55, -0.85);
+    cockpitGroup.add(seatBottom, seatBack, seatSpring);
+
+    // Dashboard Console
+    const dashGeo = new THREE.BoxGeometry(0.7, 0.35, 0.25);
+    const dash = new THREE.Mesh(dashGeo, this.materials.ironDark);
+    dash.position.set(0, 0.92, -0.2);
+    cockpitGroup.add(dash);
+
+    // Steering Column & Wheel
+    const steerColumnGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.65, 10);
+    steerColumnGeo.rotateX(Math.PI / 4);
+    const steerColumn = new THREE.Mesh(steerColumnGeo, this.materials.ironDark);
+    steerColumn.position.set(0, 1.05, -0.42);
+
+    const steeringWheelGroup = new THREE.Group();
+    const wheelRimGeo = new THREE.TorusGeometry(0.22, 0.025, 8, 20);
+    const wheelRim = new THREE.Mesh(wheelRimGeo, this.materials.rubber);
+    const wheelHubGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.04, 12);
+    wheelHubGeo.rotateX(Math.PI / 2);
+    const wheelHub = new THREE.Mesh(wheelHubGeo, this.materials.ironDark);
+    steeringWheelGroup.add(wheelRim, wheelHub);
+    steeringWheelGroup.position.set(0, 1.28, -0.58);
+    steeringWheelGroup.rotation.x = -Math.PI / 4;
+    cockpitGroup.add(steerColumn, steeringWheelGroup);
+
+    // Gear Shifter Levers
+    const gearStickGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.35, 8);
+    const gearStick = new THREE.Mesh(gearStickGeo, this.materials.chrome);
+    gearStick.position.set(0.18, 0.55, -0.55);
+    const gearKnobGeo = new THREE.SphereGeometry(0.035, 8, 8);
+    const gearKnob = new THREE.Mesh(gearKnobGeo, this.materials.rubber);
+    gearKnob.position.set(0.18, 0.72, -0.55);
+    cockpitGroup.add(gearStick, gearKnob);
+
+    root.add(cockpitGroup);
+
+    // 8. Rear Wheel Mudguards (Fenders)
+    const leftFenderGroup = new THREE.Group();
+    const fenderShape = new THREE.BoxGeometry(0.42, 0.8, 1.55);
+    const leftFender = new THREE.Mesh(fenderShape, fenderMat);
+    leftFender.position.set(-0.85, 0.95, -1.0);
+    leftFender.castShadow = true;
+    leftFenderGroup.add(leftFender);
+
+    // Grab handle on fender
+    const handleGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.45, 8);
+    const leftHandle = new THREE.Mesh(handleGeo, this.materials.chrome);
+    leftHandle.position.set(-0.95, 1.38, -0.9);
+    leftFenderGroup.add(leftHandle);
+
+    const rightFenderGroup = new THREE.Group();
+    const rightFender = new THREE.Mesh(fenderShape, fenderMat);
+    rightFender.position.set(0.85, 0.95, -1.0);
+    rightFender.castShadow = true;
+    const rightHandle = leftHandle.clone();
+    rightHandle.position.x = 0.95;
+    rightFenderGroup.add(rightFender, rightHandle);
+
+    root.add(leftFenderGroup, rightFenderGroup);
+
+    // 9. Traditional Indian Canopy (Chhatri)
+    if (cfg.canopy) {
+      const canopyGroup = new THREE.Group();
+      // 4 Upright chrome support poles
+      const poleGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.5, 8);
+      const flPole = new THREE.Mesh(poleGeo, this.materials.chrome);
+      flPole.position.set(-0.55, 1.25, -0.15);
+      const frPole = flPole.clone();
+      frPole.position.x = 0.55;
+      const rlPole = flPole.clone();
+      rlPole.position.set(-0.55, 1.25, -1.35);
+      const rrPole = rlPole.clone();
+      rrPole.position.x = 0.55;
+      canopyGroup.add(flPole, frPole, rlPole, rrPole);
+
+      // Canopy Roof Canvas
+      const roofGeo = new THREE.BoxGeometry(1.35, 0.06, 1.6);
+      const roofMat = new THREE.MeshStandardMaterial({
+        color: cfg.bodyColor === 0x0d47a1 ? 0xffffff : 0xffb300,
+        roughness: 0.8
+      });
+      const roof = new THREE.Mesh(roofGeo, roofMat);
+      roof.position.set(0, 2.02, -0.75);
+      roof.castShadow = true;
+      canopyGroup.add(roof);
+
+      // Frill border
+      const frillGeo = new THREE.BoxGeometry(1.36, 0.12, 1.61);
+      const frillMat = new THREE.MeshStandardMaterial({ color: 0xb71c1c });
+      const frill = new THREE.Mesh(frillGeo, frillMat);
+      frill.position.set(0, 1.95, -0.75);
+      canopyGroup.add(frill);
+
+      root.add(canopyGroup);
+    }
+
+    // 10. Rear 3-Point Hydraulic Hitch & Tow Drawbar
+    const hitchGroup = new THREE.Group();
+    const drawbarGeo = new THREE.BoxGeometry(0.12, 0.08, 0.65);
+    const drawbar = new THREE.Mesh(drawbarGeo, this.materials.ironDark);
+    drawbar.position.set(0, 0.12, -1.55);
+    const hitchPinGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.15, 8);
+    const hitchPin = new THREE.Mesh(hitchPinGeo, this.materials.chrome);
+    hitchPin.position.set(0, 0.22, -1.72);
+    hitchGroup.add(drawbar, hitchPin);
+    root.add(hitchGroup);
+
+    // 11. WHEELS
+    // Front Wheels (Steerable)
+    const frontWheelRadius = 0.45;
+    const frontWheelWidth = 0.26;
+    const frontLeftWheelGroup = this.createWheel(frontWheelRadius, frontWheelWidth, rimMat, 'ribbed');
+    frontLeftWheelGroup.root.position.set(-0.72, -0.12, 1.15);
+
+    const frontRightWheelGroup = this.createWheel(frontWheelRadius, frontWheelWidth, rimMat, 'ribbed');
+    frontRightWheelGroup.root.position.set(0.72, -0.12, 1.15);
+
+    // Rear Wheels (Huge Agricultural Deep Lug)
+    const rearWheelRadius = 0.78;
+    const rearWheelWidth = 0.48;
+    const rearLeftWheelGroup = this.createWheel(rearWheelRadius, rearWheelWidth, rimMat, 'agri_lug');
+    rearLeftWheelGroup.root.position.set(-0.88, 0.05, -1.05);
+
+    const rearRightWheelGroup = this.createWheel(rearWheelRadius, rearWheelWidth, rimMat, 'agri_lug');
+    rearRightWheelGroup.root.position.set(0.88, 0.05, -1.05);
+
+    root.add(frontLeftWheelGroup.root, frontRightWheelGroup.root, rearLeftWheelGroup.root, rearRightWheelGroup.root);
+
+    return {
+      root,
+      config: cfg,
+      frontLeftWheel: frontLeftWheelGroup,
+      frontRightWheel: frontRightWheelGroup,
+      rearLeftWheel: rearLeftWheelGroup,
+      rearRightWheel: rearRightWheelGroup,
+      steeringWheel: steeringWheelGroup,
+      exhaust: exhaustGroup,
+      flapper,
+      headlights: {
+        group: headlightGroup,
+        leftLens,
+        rightLens,
+        leftSpot,
+        rightSpot
+      },
+      taillights: {
+        left: leftTail,
+        right: rightTail
+      },
+      hitchPoint: hitchPin
+    };
+  }
+
+  // ==========================================
+  // WHEEL BUILDER (AGRI LUG TREADS & RIMS)
+  // ==========================================
+
+  createWheel(radius, width, rimMat, treadType = 'agri_lug') {
+    const THREE = this.THREE;
+    const wheelGroup = new THREE.Group();
+
+    // Pivot group for steering
+    const steerGroup = new THREE.Group();
+    // Spin group for rolling rotation
+    const spinGroup = new THREE.Group();
+
+    // Tire outer cylinder
+    const tireGeo = new THREE.CylinderGeometry(radius, radius, width, 24);
+    tireGeo.rotateZ(Math.PI / 2);
+    const tire = new THREE.Mesh(tireGeo, this.materials.rubber);
+    tire.castShadow = true;
+    spinGroup.add(tire);
+
+    // Rim
+    const rimRadius = radius * 0.58;
+    const rimGeo = new THREE.CylinderGeometry(rimRadius, rimRadius, width + 0.02, 18);
+    rimGeo.rotateZ(Math.PI / 2);
+    const rim = new THREE.Mesh(rimGeo, rimMat);
+    spinGroup.add(rim);
+
+    // Wheel Hub & Lug Nuts
+    const hubGeo = new THREE.CylinderGeometry(rimRadius * 0.42, rimRadius * 0.42, width + 0.06, 12);
+    hubGeo.rotateZ(Math.PI / 2);
+    const hub = new THREE.Mesh(hubGeo, this.materials.ironDark);
+    spinGroup.add(hub);
+
+    // Agricultural Deep V-Lugs on tire tread (Authentic Indian Tractor Treads)
+    if (treadType === 'agri_lug') {
+      const lugCount = 14;
+      const lugGeo = new THREE.BoxGeometry(width * 0.88, 0.08, 0.07);
+      for (let i = 0; i < lugCount; i++) {
+        const angle = (i / lugCount) * Math.PI * 2;
+        const lug = new THREE.Mesh(lugGeo, this.materials.tread);
+        lug.position.set(0, Math.sin(angle) * (radius + 0.02), Math.cos(angle) * (radius + 0.02));
+        lug.rotation.x = angle + (i % 2 === 0 ? 0.28 : -0.28);
+        spinGroup.add(lug);
+      }
+    }
+
+    steerGroup.add(spinGroup);
+    wheelGroup.add(steerGroup);
+
+    return {
+      root: wheelGroup,
+      steer: steerGroup,
+      spin: spinGroup
+    };
+  }
+
+  // ==========================================
+  // INDIAN TRACTOR TROLLEY (DESI TRAALI)
+  // ==========================================
+
+  createTrolley() {
+    const THREE = this.THREE;
+    const root = new THREE.Group();
+
+    // 1. Steel Chassis & Leaf Springs
+    const chassisGeo = new THREE.BoxGeometry(1.6, 0.2, 3.8);
+    const chassis = new THREE.Mesh(chassisGeo, this.materials.trolleyChassis);
+    chassis.position.set(0, 0, 0);
+    chassis.castShadow = true;
+    root.add(chassis);
+
+    // Triangular Tow Drawbar (A-frame)
+    const drawbarGroup = new THREE.Group();
+    const barGeo = new THREE.CylinderGeometry(0.045, 0.045, 2.1, 10);
+    const leftBar = new THREE.Mesh(barGeo, this.materials.trolleyChassis);
+    leftBar.position.set(-0.35, 0.02, 2.3);
+    leftBar.rotation.set(Math.PI / 2, 0, -0.22);
+    const rightBar = leftBar.clone();
+    rightBar.position.x = 0.35;
+    rightBar.rotation.set(Math.PI / 2, 0, 0.22);
+
+    // Swivel Hitch Eyelet ring
+    const eyeletGeo = new THREE.TorusGeometry(0.08, 0.025, 8, 16);
+    eyeletGeo.rotateX(Math.PI / 2);
+    const eyelet = new THREE.Mesh(eyeletGeo, this.materials.chrome);
+    eyelet.position.set(0, 0.02, 3.25);
+    drawbarGroup.add(leftBar, rightBar, eyelet);
+    root.add(drawbarGroup);
+
+    // 2. Cargo Bed (Tippable group)
+    const bedGroup = new THREE.Group();
+    bedGroup.position.set(0, 0.15, -0.6); // Pivot point near rear axle
+
+    // Bed Floor
+    const bedFloorGeo = new THREE.BoxGeometry(1.9, 0.08, 3.6);
+    const bedFloor = new THREE.Mesh(bedFloorGeo, this.materials.trolleyWood);
+    bedFloor.position.set(0, 0, 0.6);
+    bedFloor.castShadow = true;
+    bedGroup.add(bedFloor);
+
+    // Sideboards with Indian Truck Art styling
+    const sideGeo = new THREE.BoxGeometry(0.08, 0.75, 3.6);
+    const leftSide = new THREE.Mesh(sideGeo, this.materials.trolleyPaintBlue);
+    leftSide.position.set(-0.95, 0.38, 0.6);
+    leftSide.castShadow = true;
+    const rightSide = leftSide.clone();
+    rightSide.position.x = 0.95;
+
+    // Front Board
+    const frontGeo = new THREE.BoxGeometry(1.9, 0.75, 0.08);
+    const frontBoard = new THREE.Mesh(frontGeo, this.materials.trolleyPaintBlue);
+    frontBoard.position.set(0, 0.38, 2.4);
+
+    // Rear Tailgate (Hinged at top)
+    const rearGeo = new THREE.BoxGeometry(1.9, 0.75, 0.08);
+    const rearBoard = new THREE.Mesh(rearGeo, this.materials.trolleyPaintBlue);
+    rearBoard.position.set(0, 0.38, -1.2);
+
+    bedGroup.add(leftSide, rightSide, frontBoard, rearBoard);
+
+    // Cargo Container Group (holds sacks / sugarcane)
+    const cargoGroup = new THREE.Group();
+    cargoGroup.position.set(0, 0.1, 0.6);
+    bedGroup.add(cargoGroup);
+
+    root.add(bedGroup);
+
+    // 3. Dual Rear Wheels
+    const wheelRadius = 0.55;
+    const wheelWidth = 0.32;
+    const leftTrolleyWheel = this.createWheel(wheelRadius, wheelWidth, this.materials.rimRed, 'agri_lug');
+    leftTrolleyWheel.root.position.set(-1.05, -0.25, -0.6);
+    const rightTrolleyWheel = this.createWheel(wheelRadius, wheelWidth, this.materials.rimRed, 'agri_lug');
+    rightTrolleyWheel.root.position.set(1.05, -0.25, -0.6);
+
+    root.add(leftTrolleyWheel.root, rightTrolleyWheel.root);
+
+    return {
+      root,
+      bedGroup,
+      cargoGroup,
+      leftWheel: leftTrolleyWheel,
+      rightWheel: rightTrolleyWheel,
+      hitchEyelet: eyelet
+    };
+  }
+
+  // ==========================================
+  // CARGO CREATION (WHEAT SACKS / SUGARCANE)
+  // ==========================================
+
+  createCargoLoad(type = 'wheat', count = 10) {
+    const THREE = this.THREE;
+    const group = new THREE.Group();
+
+    if (type === 'wheat') {
+      // Burlap Jute sacks neatly stacked
+      const sackGeo = new THREE.BoxGeometry(0.55, 0.25, 0.85);
+      let idx = 0;
+      for (let layer = 0; layer < 2 && idx < count; layer++) {
+        for (let row = 0; row < 3 && idx < count; row++) {
+          for (let col = 0; col < 2 && idx < count; col++) {
+            const sack = new THREE.Mesh(sackGeo, this.materials.juteSack);
+            sack.position.set((col - 0.5) * 0.65, layer * 0.28 + 0.14, (row - 1) * 0.95);
+            sack.rotation.y = (Math.random() - 0.5) * 0.1;
+            sack.castShadow = true;
+            group.add(sack);
+            idx++;
+          }
+        }
+      }
+    } else if (type === 'sugarcane') {
+      // Dense bundles of green/purple sugarcane stalks
+      const bundleGeo = new THREE.CylinderGeometry(0.18, 0.18, 3.2, 8);
+      bundleGeo.rotateX(Math.PI / 2);
+      for (let i = 0; i < Math.min(count, 12); i++) {
+        const bundle = new THREE.Mesh(bundleGeo, this.materials.sugarcane);
+        bundle.position.set(((i % 4) - 1.5) * 0.38, Math.floor(i / 4) * 0.32 + 0.18, 0);
+        bundle.castShadow = true;
+        group.add(bundle);
+      }
+    }
+
+    return group;
+  }
+
+  // ==========================================
+  // FARMING IMPLEMENTS (CULTIVATOR, PLOUGH, DRILL)
+  // ==========================================
+
+  createImplement(type = 'cultivator') {
+    const THREE = this.THREE;
+    const root = new THREE.Group();
+
+    // 3-point mounting A-frame
+    const aFrameGroup = new THREE.Group();
+    const beamGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.1, 8);
+    const leftArm = new THREE.Mesh(beamGeo, this.materials.implementSteel);
+    leftArm.position.set(-0.35, 0.45, 0.2);
+    leftArm.rotation.z = -0.3;
+    const rightArm = leftArm.clone();
+    rightArm.position.x = 0.35;
+    rightArm.rotation.z = 0.3;
+    const topPinGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.15, 8);
+    const topPin = new THREE.Mesh(topPinGeo, this.materials.chrome);
+    topPin.position.set(0, 0.9, 0.2);
+    topPin.rotation.x = Math.PI / 2;
+    aFrameGroup.add(leftArm, rightArm, topPin);
+    root.add(aFrameGroup);
+
+    if (type === 'cultivator') {
+      // 9-Tine Spring Loaded Cultivator (Tilla)
+      const frameGeo = new THREE.BoxGeometry(2.1, 0.1, 0.6);
+      const frame = new THREE.Mesh(frameGeo, this.materials.implementSteel);
+      frame.position.set(0, 0.15, -0.2);
+      frame.castShadow = true;
+      root.add(frame);
+
+      // Curved steel tines with shovel duckfoot points
+      const tineCurveGeo = new THREE.TorusGeometry(0.28, 0.035, 8, 12, Math.PI * 0.65);
+      tineCurveGeo.rotateY(Math.PI / 2);
+      const tineCount = 9;
+      for (let i = 0; i < tineCount; i++) {
+        const x = ((i / (tineCount - 1)) - 0.5) * 1.95;
+        const z = (i % 2 === 0 ? -0.1 : -0.35);
+        const tine = new THREE.Mesh(tineCurveGeo, this.materials.implementSteel);
+        tine.position.set(x, 0.1, z);
+        tine.castShadow = true;
+        root.add(tine);
+      }
+    } else if (type === 'plough') {
+      // 3-Bottom Mouldboard Reversible Plough (Hal)
+      const beamGeo = new THREE.BoxGeometry(0.15, 0.15, 1.8);
+      beamGeo.rotateY(0.35);
+      const beam = new THREE.Mesh(beamGeo, this.materials.implementSteel);
+      beam.position.set(0, 0.2, -0.4);
+      beam.castShadow = true;
+      root.add(beam);
+
+      for (let i = 0; i < 3; i++) {
+        const shareGeo = new THREE.ConeGeometry(0.25, 0.6, 6);
+        shareGeo.rotateZ(Math.PI / 3);
+        const share = new THREE.Mesh(shareGeo, this.materials.chrome);
+        share.position.set((i - 1) * 0.45, 0.0, -i * 0.55);
+        share.castShadow = true;
+        root.add(share);
+      }
+    } else if (type === 'seed_drill') {
+      // Seed Drill Box + Dispenser tubes
+      const boxGeo = new THREE.BoxGeometry(2.0, 0.5, 0.5);
+      const boxMat = new THREE.MeshStandardMaterial({ color: 0x0277bd, roughness: 0.5 });
+      const box = new THREE.Mesh(boxGeo, boxMat);
+      box.position.set(0, 0.5, -0.25);
+      box.castShadow = true;
+      root.add(box);
+
+      // 7 Seed dropper tubes
+      for (let i = 0; i < 7; i++) {
+        const tubeGeo = new THREE.CylinderGeometry(0.02, 0.03, 0.6, 8);
+        const tube = new THREE.Mesh(tubeGeo, this.materials.rubber);
+        tube.position.set(((i / 6) - 0.5) * 1.8, 0.15, -0.25);
+        tube.castShadow = true;
+        root.add(tube);
+      }
+    }
+
+    return {
+      root,
+      type
+    };
+  }
+}
+
+
+  // ==========================================
+  // MODULE: world.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - Open-World Indian Village Environment
+ * Generates an explorable rural Indian landscape with paved & dirt roads,
+ * interactive agricultural fields with soil state tracking, farmhouses,
+ * canal bridge, tubewell water pump, and Kisan Mandi market.
+ */
+
+class WorldManager {
+  constructor(THREE) {
+    this.THREE = THREE;
+    this.root = new THREE.Group();
+
+    // Terrain parameters
+    this.worldSize = 560;
+
+    // Interactive Agricultural Field States
+    // Field 1: Wheat Field (90m x 70m)
+    this.field1 = {
+      centerX: -75,
+      centerZ: 85,
+      width: 90,
+      depth: 70,
+      gridCols: 14,
+      gridRows: 10,
+      patches: [], // 0: Raw stubble, 1: Cultivated/ploughed, 2: Seeded, 3: Golden ripe
+      meshGroup: new THREE.Group(),
+      cropMeshes: []
+    };
+
+    // Field 2: Mustard Field (Yellow flowers)
+    this.field2 = {
+      centerX: 85,
+      centerZ: 95,
+      width: 85,
+      depth: 65,
+      meshGroup: new THREE.Group()
+    };
+
+    // Field 3: Sugarcane Field (Tall green stalks)
+    this.field3 = {
+      centerX: 95,
+      centerZ: -85,
+      width: 105,
+      depth: 75,
+      meshGroup: new THREE.Group()
+    };
+
+    // Landmark Locations for Missions & GPS Minimap
+    this.waypoints = {
+      farm_shed: { x: -20, z: -25, name: 'Farm Yard Shed', color: 0x4caf50 },
+      farmer_house: { x: -45, z: -55, name: 'Village Elder House', color: 0x2196f3 },
+      kisan_mandi: { x: -140, z: -120, name: 'Kisan Mandi (Grain Market)', color: 0xff9800 },
+      canal_bridge: { x: -80, z: -20, name: 'Canal Bridge', color: 0x00bcd4 },
+      tubewell_pump: { x: 35, z: 25, name: 'Tubewell Boring Pump', color: 0x00e676 },
+      mud_trail: { x: 40, z: -120, name: 'Muddy Trail', color: 0x795548 },
+      field1: { x: -75, z: 85, name: 'Wheat Field #1', color: 0xffeb3b },
+      field2: { x: 85, z: 95, name: 'Mustard Field #2', color: 0xffd600 },
+      field3: { x: 95, z: -85, name: 'Sugarcane Field #3', color: 0x8bc34a }
+    };
+
+    // Streetlights for night illumination
+    this.streetlights = [];
+  }
+
+  // ==========================================
+  // TERRAIN HEIGHTMAP & SURFACE PROFILER
+  // ==========================================
+
+  getTerrainHeight(x, z) {
+    // Canal ditch cut-out
+    if (x > -92 && x < -68 && Math.abs(z + 20) > 8) {
+      // Deep canal channel except at the bridge (z approx -20)
+      return -2.4;
+    }
+
+    // Gentle rural rolling topography
+    const wave1 = Math.sin(x * 0.015) * Math.cos(z * 0.015) * 1.5;
+    const wave2 = Math.sin(x * 0.035 + 1.2) * Math.cos(z * 0.032) * 0.6;
+
+    // Flatten village center, fields, and mandi
+    const distFromCenter = Math.hypot(x, z);
+    if (distFromCenter < 60) return 0.0; // village center flat
+    if (Math.hypot(x - (-75), z - 85) < 55) return 0.2; // Field 1 flat
+    if (Math.hypot(x - 85, z - 95) < 50) return 0.15; // Field 2 flat
+    if (Math.hypot(x - (-140), z - (-120)) < 40) return 0.0; // Mandi flat
+
+    return Math.max(-0.5, wave1 + wave2);
+  }
+
+  getSurfaceType(x, z) {
+    // 1. Paved Village Road Bypass (Main road)
+    if ((Math.abs(x) < 4.5 && z > -160 && z < 160) || (Math.abs(z + 20) < 4.5 && x > -160 && x < 160)) {
+      return 'road';
+    }
+
+    // 2. Muddy Trail (Southern off-road section)
+    if (x > 15 && x < 75 && z < -90 && z > -150) {
+      return 'mud';
+    }
+
+    // 3. Agricultural Fields
+    if (Math.abs(x - this.field1.centerX) < this.field1.width * 0.5 &&
+        Math.abs(z - this.field1.centerZ) < this.field1.depth * 0.5) {
+      return 'field';
+    }
+    if (Math.abs(x - this.field2.centerX) < this.field2.width * 0.5 &&
+        Math.abs(z - this.field2.centerZ) < this.field2.depth * 0.5) {
+      return 'field';
+    }
+    if (Math.abs(x - this.field3.centerX) < this.field3.width * 0.5 &&
+        Math.abs(z - this.field3.centerZ) < this.field3.depth * 0.5) {
+      return 'field';
+    }
+
+    // 4. Dirt tracks connecting farm sheds and fields
+    if (Math.hypot(x - (-20), z - (-25)) < 30 || Math.hypot(x - 35, z - 25) < 25) {
+      return 'dirt';
+    }
+
+    return 'grass';
+  }
+
+  // ==========================================
+  // BUILD WORLD SCENERY
+  // ==========================================
+
+  build() {
+    const THREE = this.THREE;
+
+    // 1. Base Terrain Mesh
+    const terrainGeo = new THREE.PlaneGeometry(this.worldSize, this.worldSize, 64, 64);
+    terrainGeo.rotateX(-Math.PI / 2);
+
+    const pos = terrainGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const vx = pos.getX(i);
+      const vz = pos.getZ(i);
+      pos.setY(i, this.getTerrainHeight(vx, vz));
+    }
+    terrainGeo.computeVertexNormals();
+
+    const terrainMat = new THREE.MeshStandardMaterial({
+      color: 0x5a7e32, // Lush rural Indian green
+      roughness: 0.9,
+      metalness: 0.05
+    });
+
+    const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+    terrain.receiveShadow = true;
+    this.root.add(terrain);
+
+    // 2. Road Network
+    this.buildRoads();
+
+    // 3. Canal & Arched Bridge
+    this.buildCanalAndBridge();
+
+    // 4. Agricultural Fields
+    this.buildFields();
+
+    // 5. Village Farmhouses & Brick Buildings
+    this.buildVillageStructures();
+
+    // 6. Tubewell Water Pump & Flowing Pond
+    this.buildTubewellPump();
+
+    // 7. Kisan Mandi (Grain Market)
+    this.buildKisanMandi();
+
+    // 8. Trees, Foliage & Boundary Walls
+    this.buildVegetationAndProps();
+
+    return this.root;
+  }
+
+  buildRoads() {
+    const THREE = this.THREE;
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x333333, // Paved asphalt
+      roughness: 0.85
+    });
+    const roadLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    // North-South Main Village Highway (width 8m, length 320m)
+    const nsRoadGeo = new THREE.PlaneGeometry(8, 320);
+    nsRoadGeo.rotateX(-Math.PI / 2);
+    const nsRoad = new THREE.Mesh(nsRoadGeo, roadMat);
+    nsRoad.position.set(0, 0.04, 0);
+    nsRoad.receiveShadow = true;
+    this.root.add(nsRoad);
+
+    // Center divider dash lines
+    for (let z = -150; z < 150; z += 12) {
+      const dashGeo = new THREE.PlaneGeometry(0.25, 5);
+      dashGeo.rotateX(-Math.PI / 2);
+      const dash = new THREE.Mesh(dashGeo, roadLineMat);
+      dash.position.set(0, 0.05, z);
+      this.root.add(dash);
+    }
+
+    // East-West Farm Link Road (crossing canal over bridge)
+    const ewRoadGeo = new THREE.PlaneGeometry(320, 7.5);
+    ewRoadGeo.rotateX(-Math.PI / 2);
+    const ewRoad = new THREE.Mesh(ewRoadGeo, roadMat);
+    ewRoad.position.set(0, 0.04, -20);
+    ewRoad.receiveShadow = true;
+    this.root.add(ewRoad);
+
+    // Dirt trails to farm shed & fields
+    const dirtMat = new THREE.MeshStandardMaterial({
+      color: 0x795548, // Rich Indian red-brown soil
+      roughness: 0.95
+    });
+
+    const dirtTrack1Geo = new THREE.PlaneGeometry(120, 6);
+    dirtTrack1Geo.rotateX(-Math.PI / 2);
+    dirtTrack1Geo.rotateY(0.4);
+    const dirtTrack1 = new THREE.Mesh(dirtTrack1Geo, dirtMat);
+    dirtTrack1.position.set(-45, 0.03, 40);
+    dirtTrack1.receiveShadow = true;
+    this.root.add(dirtTrack1);
+
+    // Southern Muddy Off-Road Trail
+    const mudMat = new THREE.MeshStandardMaterial({
+      color: 0x4e342e, // Wet dark mud
+      roughness: 0.35, // Shiny wet mud
+      metalness: 0.2
+    });
+    const mudTrailGeo = new THREE.PlaneGeometry(65, 12);
+    mudTrailGeo.rotateX(-Math.PI / 2);
+    const mudTrail = new THREE.Mesh(mudTrailGeo, mudMat);
+    mudTrail.position.set(45, 0.03, -120);
+    mudTrail.receiveShadow = true;
+    this.root.add(mudTrail);
+  }
+
+  buildCanalAndBridge() {
+    const THREE = this.THREE;
+
+    // Canal Water Stream
+    const canalWaterGeo = new THREE.PlaneGeometry(20, 340);
+    canalWaterGeo.rotateX(-Math.PI / 2);
+    const canalWaterMat = new THREE.MeshStandardMaterial({
+      color: 0x00838f,
+      roughness: 0.1,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0.85
+    });
+    const water = new THREE.Mesh(canalWaterGeo, canalWaterMat);
+    water.position.set(-80, -1.1, 0);
+    this.root.add(water);
+
+    // Brick Arched Bridge spanning canal at z = -20
+    const bridgeGroup = new THREE.Group();
+    bridgeGroup.position.set(-80, 0.1, -20);
+
+    const bridgeDeckGeo = new THREE.BoxGeometry(26, 0.6, 9.5);
+    const brickMat = new THREE.MeshStandardMaterial({ color: 0x8d4925, roughness: 0.85 });
+    const bridgeDeck = new THREE.Mesh(bridgeDeckGeo, brickMat);
+    bridgeDeck.castShadow = true;
+    bridgeDeck.receiveShadow = true;
+    bridgeGroup.add(bridgeDeck);
+
+    // Brick Railings (Guard walls with white pillar caps)
+    const railGeo = new THREE.BoxGeometry(26, 0.9, 0.45);
+    const northRail = new THREE.Mesh(railGeo, brickMat);
+    northRail.position.set(0, 0.7, 4.5);
+    const southRail = northRail.clone();
+    southRail.position.z = -4.5;
+    bridgeGroup.add(northRail, southRail);
+
+    // 4 White decorative bridge end pillars
+    const pillarGeo = new THREE.BoxGeometry(0.7, 1.3, 0.7);
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
+    for (const px of [-12.5, 12.5]) {
+      for (const pz of [-4.5, 4.5]) {
+        const pillar = new THREE.Mesh(pillarGeo, whiteMat);
+        pillar.position.set(px, 0.65, pz);
+        pillar.castShadow = true;
+        bridgeGroup.add(pillar);
+      }
+    }
+
+    this.root.add(bridgeGroup);
+  }
+
+  buildFields() {
+    const THREE = this.THREE;
+
+    // ==========================================
+    // FIELD 1: INTERACTIVE WHEAT FIELD (SOIL GRID)
+    // ==========================================
+    const f1 = this.field1;
+    const soilBaseGeo = new THREE.PlaneGeometry(f1.width, f1.depth);
+    soilBaseGeo.rotateX(-Math.PI / 2);
+    const stubbleMat = new THREE.MeshStandardMaterial({ color: 0x795548, roughness: 0.95 });
+    const f1Base = new THREE.Mesh(soilBaseGeo, stubbleMat);
+    f1Base.position.set(f1.centerX, 0.05, f1.centerZ);
+    f1Base.receiveShadow = true;
+    this.root.add(f1Base);
+
+    // Soil Grid Patches
+    const patchW = f1.width / f1.gridCols;
+    const patchD = f1.depth / f1.gridRows;
+    const ploughedMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.95 }); // Rich dark furrowed soil
+    const wheatCropMat = new THREE.MeshStandardMaterial({ color: 0xd4a017, roughness: 0.8 }); // Golden ripe wheat
+
+    f1.meshGroup.position.set(f1.centerX, 0.06, f1.centerZ);
+
+    for (let r = 0; r < f1.gridRows; r++) {
+      for (let c = 0; c < f1.gridCols; c++) {
+        const px = (c - f1.gridCols * 0.5 + 0.5) * patchW;
+        const pz = (r - f1.gridRows * 0.5 + 0.5) * patchD;
+
+        const patchGeo = new THREE.PlaneGeometry(patchW * 0.96, patchD * 0.96);
+        patchGeo.rotateX(-Math.PI / 2);
+        const patchMesh = new THREE.Mesh(patchGeo, stubbleMat);
+        patchMesh.position.set(px, 0, pz);
+        f1.meshGroup.add(patchMesh);
+
+        // Wheat Crop cluster (hidden until sown/grown)
+        const cropCluster = new THREE.Group();
+        cropCluster.position.set(px, 0, pz);
+        const stalkGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.75, 5);
+        for (let i = 0; i < 5; i++) {
+          const stalk = new THREE.Mesh(stalkGeo, wheatCropMat);
+          stalk.position.set((Math.random() - 0.5) * patchW * 0.6, 0.38, (Math.random() - 0.5) * patchD * 0.6);
+          stalk.rotation.z = (Math.random() - 0.5) * 0.2;
+          cropCluster.add(stalk);
+        }
+        cropCluster.visible = false;
+        f1.meshGroup.add(cropCluster);
+
+        f1.patches.push({
+          col: c,
+          row: r,
+          worldX: f1.centerX + px,
+          worldZ: f1.centerZ + pz,
+          state: 0, // 0: Raw stubble, 1: Cultivated, 2: Seeded, 3: Golden Ripe
+          mesh: patchMesh,
+          cropMesh: cropCluster,
+          ploughedMat,
+          stubbleMat
+        });
+      }
+    }
+    this.root.add(f1.meshGroup);
+
+    // ==========================================
+    // FIELD 2: MUSTARD FIELD (SARSON KE KHET)
+    // ==========================================
+    const f2 = this.field2;
+    const f2SoilGeo = new THREE.PlaneGeometry(f2.width, f2.depth);
+    f2SoilGeo.rotateX(-Math.PI / 2);
+    const f2Soil = new THREE.Mesh(f2SoilGeo, ploughedMat);
+    f2Soil.position.set(f2.centerX, 0.05, f2.centerZ);
+    this.root.add(f2Soil);
+
+    // Dense bright yellow mustard flower clusters
+    const mustardMat = new THREE.MeshStandardMaterial({ color: 0xffeb3b, roughness: 0.7 });
+    const flowerGeo = new THREE.DodecahedronGeometry(0.35, 0);
+    const mustardCluster = new THREE.Group();
+    mustardCluster.position.set(f2.centerX, 0.4, f2.centerZ);
+
+    for (let i = 0; i < 90; i++) {
+      const flower = new THREE.Mesh(flowerGeo, mustardMat);
+      flower.position.set((Math.random() - 0.5) * (f2.width - 4), (Math.random() * 0.4), (Math.random() - 0.5) * (f2.depth - 4));
+      mustardCluster.add(flower);
+    }
+    this.root.add(mustardCluster);
+
+    // ==========================================
+    // FIELD 3: SUGARCANE FIELD (GANNA)
+    // ==========================================
+    const f3 = this.field3;
+    const f3SoilGeo = new THREE.PlaneGeometry(f3.width, f3.depth);
+    f3SoilGeo.rotateX(-Math.PI / 2);
+    const f3Soil = new THREE.Mesh(f3SoilGeo, ploughedMat);
+    f3Soil.position.set(f3.centerX, 0.05, f3.centerZ);
+    this.root.add(f3Soil);
+
+    const caneMat = new THREE.MeshStandardMaterial({ color: 0x33691e, roughness: 0.6 });
+    const caneGeo = new THREE.CylinderGeometry(0.12, 0.14, 2.8, 6);
+    const caneGroup = new THREE.Group();
+    caneGroup.position.set(f3.centerX, 1.4, f3.centerZ);
+
+    for (let i = 0; i < 110; i++) {
+      const cane = new THREE.Mesh(caneGeo, caneMat);
+      cane.position.set((Math.random() - 0.5) * (f3.width - 6), 0, (Math.random() - 0.5) * (f3.depth - 6));
+      cane.rotation.z = (Math.random() - 0.5) * 0.15;
+      caneGroup.add(cane);
+    }
+    this.root.add(caneGroup);
+  }
+
+  updateSoilCultivation(toolWorldX, toolWorldZ, toolRadius = 2.4, isPloughing = true) {
+    let cultivatedCount = 0;
+    const total = this.field1.patches.length;
+
+    for (const patch of this.field1.patches) {
+      const dist = Math.hypot(toolWorldX - patch.worldX, toolWorldZ - patch.worldZ);
+      if (dist < toolRadius) {
+        if (isPloughing && patch.state === 0) {
+          patch.state = 1;
+          patch.mesh.material = patch.ploughedMat;
+        } else if (!isPloughing && patch.state === 1) {
+          // Sowing seeds
+          patch.state = 2;
+          patch.cropMesh.visible = true;
+        }
+      }
+      if (patch.state >= 1) cultivatedCount++;
+    }
+
+    return (cultivatedCount / total) * 100; // Percentage cultivated
+  }
+
+  buildVillageStructures() {
+    const THREE = this.THREE;
+
+    // 1. Starting Farm Shed (Tractor parking garage)
+    const shedGroup = new THREE.Group();
+    shedGroup.position.set(-20, 0, -25);
+
+    // Corrugated iron curved roof
+    const roofGeo = new THREE.CylinderGeometry(4.8, 4.8, 12, 16, 1, false, 0, Math.PI);
+    roofGeo.rotateZ(Math.PI / 2);
+    const ironRoofMat = new THREE.MeshStandardMaterial({ color: 0x546e7a, roughness: 0.6, metalness: 0.7 });
+    const shedRoof = new THREE.Mesh(roofGeo, ironRoofMat);
+    shedRoof.position.set(0, 3.8, 0);
+    shedRoof.castShadow = true;
+    shedGroup.add(shedRoof);
+
+    // 4 Steel support columns
+    const colGeo = new THREE.CylinderGeometry(0.12, 0.12, 4.2, 8);
+    const colMat = new THREE.MeshStandardMaterial({ color: 0x263238, metalness: 0.8 });
+    for (const cx of [-3.8, 3.8]) {
+      for (const cz of [-5.2, 5.2]) {
+        const col = new THREE.Mesh(colGeo, colMat);
+        col.position.set(cx, 2.1, cz);
+        col.castShadow = true;
+        shedGroup.add(col);
+      }
+    }
+    this.root.add(shedGroup);
+
+    // 2. Village Pukka Brick Farmhouses
+    const houseConfigs = [
+      { x: -45, z: -55, color: 0x1976d2, name: "Elder House" }, // Swaraj blue painted house
+      { x: -55, z: -75, color: 0xfff9c4, name: "Haveli" },      // Light cream house
+      { x: 30, z: -45, color: 0xffcc80, name: "Farmhouse" }      // Warm saffron house
+    ];
+
+    houseConfigs.forEach(h => {
+      const house = new THREE.Group();
+      house.position.set(h.x, 0, h.z);
+
+      // Main House Block
+      const wallMat = new THREE.MeshStandardMaterial({ color: h.color, roughness: 0.85 });
+      const mainGeo = new THREE.BoxGeometry(11, 4.2, 8);
+      const mainWall = new THREE.Mesh(mainGeo, wallMat);
+      mainWall.position.set(0, 2.1, 0);
+      mainWall.castShadow = true;
+      mainWall.receiveShadow = true;
+      house.add(mainWall);
+
+      // Flat Roof Parapet Wall
+      const roofFloorGeo = new THREE.BoxGeometry(11.4, 0.3, 8.4);
+      const concreteMat = new THREE.MeshStandardMaterial({ color: 0xb0bec5, roughness: 0.9 });
+      const roofFloor = new THREE.Mesh(roofFloorGeo, concreteMat);
+      roofFloor.position.set(0, 4.35, 0);
+      house.add(roofFloor);
+
+      // Sintex Black Water Tank on Rooftop (Authentic Indian Detail)
+      const tankGeo = new THREE.CylinderGeometry(0.8, 0.8, 1.4, 16);
+      const tankMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 });
+      const tank = new THREE.Mesh(tankGeo, tankMat);
+      tank.position.set(3.2, 5.2, 2.2);
+      tank.castShadow = true;
+      house.add(tank);
+
+      // Wooden Entrance Door & Windows
+      const doorMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
+      const doorGeo = new THREE.BoxGeometry(1.4, 2.6, 0.1);
+      const door = new THREE.Mesh(doorGeo, doorMat);
+      door.position.set(0, 1.3, 4.05);
+      house.add(door);
+
+      // Traditional Charpai (Indian woven cot in front of house)
+      const cotGroup = new THREE.Group();
+      cotGroup.position.set(3.5, 0.3, 5.8);
+      const cotFrame = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 1.1), new THREE.MeshStandardMaterial({ color: 0x8d6e63 }));
+      cotGroup.add(cotFrame);
+      for (const lx of [-0.9, 0.9]) {
+        for (const lz of [-0.45, 0.45]) {
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0x5d4037 }));
+          leg.position.set(lx, -0.18, lz);
+          cotGroup.add(leg);
+        }
+      }
+      house.add(cotGroup);
+
+      this.root.add(house);
+    });
+  }
+
+  buildTubewellPump() {
+    const THREE = this.THREE;
+    const pumpGroup = new THREE.Group();
+    pumpGroup.position.set(35, 0, 25);
+
+    // Pump house room
+    const pumpHouseGeo = new THREE.BoxGeometry(4.2, 3.2, 4.2);
+    const brickMat = new THREE.MeshStandardMaterial({ color: 0xb71c1c, roughness: 0.9 });
+    const pumpHouse = new THREE.Mesh(pumpHouseGeo, brickMat);
+    pumpHouse.position.set(0, 1.6, 0);
+    pumpHouse.castShadow = true;
+    pumpGroup.add(pumpHouse);
+
+    // Heavy Delivery Water Pipe (Delivery tube gushing into pool)
+    const pipeGeo = new THREE.CylinderGeometry(0.18, 0.18, 3.2, 12);
+    pipeGeo.rotateZ(Math.PI / 2);
+    const pipe = new THREE.Mesh(pipeGeo, new THREE.MeshStandardMaterial({ color: 0x37474f, metalness: 0.8 }));
+    pipe.position.set(2.8, 1.1, 0);
+    pumpGroup.add(pipe);
+
+    // Concrete Water Irrigation Trough & Pond
+    const troughGeo = new THREE.BoxGeometry(6.5, 0.6, 4.5);
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, roughness: 0.8 });
+    const trough = new THREE.Mesh(troughGeo, concreteMat);
+    trough.position.set(6.2, 0.3, 0);
+    pumpGroup.add(trough);
+
+    // Water Surface in Trough
+    const waterGeo = new THREE.PlaneGeometry(5.8, 3.8);
+    waterGeo.rotateX(-Math.PI / 2);
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x00acc1,
+      roughness: 0.05,
+      metalness: 0.9,
+      transparent: true,
+      opacity: 0.9
+    });
+    const poolWater = new THREE.Mesh(waterGeo, waterMat);
+    poolWater.position.set(6.2, 0.52, 0);
+    pumpGroup.add(poolWater);
+
+    this.root.add(pumpGroup);
+  }
+
+  buildKisanMandi() {
+    const THREE = this.THREE;
+    const mandiGroup = new THREE.Group();
+    mandiGroup.position.set(-140, 0, -120);
+
+    // Large Covered Mandi Shed Platform
+    const platformGeo = new THREE.BoxGeometry(32, 0.5, 24);
+    const platformMat = new THREE.MeshStandardMaterial({ color: 0x78909c, roughness: 0.9 });
+    const platform = new THREE.Mesh(platformGeo, platformMat);
+    platform.position.set(0, 0.25, 0);
+    platform.receiveShadow = true;
+    mandiGroup.add(platform);
+
+    // High Tin Canopy Roof
+    const roofGeo = new THREE.BoxGeometry(34, 0.2, 26);
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x0288d1, roughness: 0.5, metalness: 0.4 });
+    const roof = new THREE.Mesh(roofGeo, roofMat);
+    roof.position.set(0, 6.2, 0);
+    roof.castShadow = true;
+    mandiGroup.add(roof);
+
+    // Steel Pillars
+    const colGeo = new THREE.CylinderGeometry(0.18, 0.18, 6.0, 10);
+    const colMat = new THREE.MeshStandardMaterial({ color: 0x263238, metalness: 0.8 });
+    for (const cx of [-15, 0, 15]) {
+      for (const cz of [-11, 11]) {
+        const col = new THREE.Mesh(colGeo, colMat);
+        col.position.set(cx, 3.25, cz);
+        col.castShadow = true;
+        mandiGroup.add(col);
+      }
+    }
+
+    // Huge Stacks of Jute Grain Sacks in Mandi
+    const sackMat = new THREE.MeshStandardMaterial({ color: 0xc4a375, roughness: 0.9 });
+    const sackGeo = new THREE.BoxGeometry(0.8, 0.35, 1.2);
+    for (let stack = 0; stack < 6; stack++) {
+      const sx = (stack - 2.5) * 4.2;
+      for (let layer = 0; layer < 4; layer++) {
+        for (let r = 0; r < 2; r++) {
+          const sack = new THREE.Mesh(sackGeo, sackMat);
+          sack.position.set(sx + (r - 0.5) * 0.9, 0.5 + layer * 0.36, -5 + r * 1.3);
+          sack.castShadow = true;
+          mandiGroup.add(sack);
+        }
+      }
+    }
+
+    // Unloading Drop Zone Marker Ring
+    const ringGeo = new THREE.RingGeometry(3.5, 4.2, 32);
+    ringGeo.rotateX(-Math.PI / 2);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xff9800, side: THREE.DoubleSide });
+    const markerRing = new THREE.Mesh(ringGeo, ringMat);
+    markerRing.position.set(0, 0.55, 6);
+    mandiGroup.add(markerRing);
+
+    // Big Hindi/English Sign Board: "KISAN GRAIN MANDI"
+    const signBoardGeo = new THREE.BoxGeometry(14, 1.8, 0.2);
+    const signMat = new THREE.MeshStandardMaterial({ color: 0xffeb3b });
+    const sign = new THREE.Mesh(signBoardGeo, signMat);
+    sign.position.set(0, 7.2, 13);
+    mandiGroup.add(sign);
+
+    this.root.add(mandiGroup);
+  }
+
+  buildVegetationAndProps() {
+    const THREE = this.THREE;
+
+    // 1. Village Banyan Tree (Peepal / Bargad with concrete seating platform)
+    const banyanGroup = new THREE.Group();
+    banyanGroup.position.set(12, 0, 15);
+
+    // Concrete circular platform (Chabutra)
+    const chabutraGeo = new THREE.CylinderGeometry(4.2, 4.5, 0.7, 24);
+    const chabutra = new THREE.Mesh(chabutraGeo, new THREE.MeshStandardMaterial({ color: 0xcfd8dc }));
+    chabutra.position.set(0, 0.35, 0);
+    banyanGroup.add(chabutra);
+
+    // Massive Trunk & Foliage
+    const trunkGeo = new THREE.CylinderGeometry(0.8, 1.4, 6.5, 12);
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4e342e, roughness: 0.9 });
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    trunk.position.set(0, 3.5, 0);
+    trunk.castShadow = true;
+    banyanGroup.add(trunk);
+
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.85 });
+    for (let f = 0; f < 6; f++) {
+      const canopyBall = new THREE.Mesh(new THREE.DodecahedronGeometry(3.2 + Math.random() * 1.2, 1), foliageMat);
+      canopyBall.position.set((Math.random() - 0.5) * 4.5, 7.2 + Math.random() * 2, (Math.random() - 0.5) * 4.5);
+      canopyBall.castShadow = true;
+      banyanGroup.add(canopyBall);
+    }
+    this.root.add(banyanGroup);
+
+    // 2. Roadside Trees (Neem & Eucalyptus lining the road)
+    for (let i = 0; i < 28; i++) {
+      const z = -140 + i * 10;
+      if (Math.abs(z + 20) < 14) continue; // Skip bridge intersection
+
+      for (const side of [-5.5, 5.5]) {
+        const tree = new THREE.Group();
+        tree.position.set(side, 0, z);
+
+        const tTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, 4.5, 8), trunkMat);
+        tTrunk.position.set(0, 2.25, 0);
+        tTrunk.castShadow = true;
+        tree.add(tTrunk);
+
+        const tFoliage = new THREE.Mesh(new THREE.ConeGeometry(1.8, 4.2, 8), foliageMat);
+        tFoliage.position.set(0, 5.2, 0);
+        tFoliage.castShadow = true;
+        tree.add(tFoliage);
+
+        this.root.add(tree);
+      }
+    }
+
+    // 3. Village Streetlights (Working lights for Night driving!)
+    const poleMat = new THREE.MeshStandardMaterial({ color: 0x37474f, metalness: 0.8 });
+    const lampMat = new THREE.MeshBasicMaterial({ color: 0xfffae0 });
+
+    const lightPositions = [
+      { x: -5.5, z: -60 },
+      { x: 5.5, z: -10 },
+      { x: -5.5, z: 40 },
+      { x: 5.5, z: 90 },
+      { x: -125, z: -120 } // Mandi light
+    ];
+
+    lightPositions.forEach(lp => {
+      const lightPost = new THREE.Group();
+      lightPost.position.set(lp.x, 0, lp.z);
+
+      // Steel pole
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 6.5, 8), poleMat);
+      pole.position.set(0, 3.25, 0);
+      pole.castShadow = true;
+      lightPost.add(pole);
+
+      // Overhanging curved arm
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.08), poleMat);
+      arm.position.set(lp.x < 0 ? 0.7 : -0.7, 6.4, 0);
+      lightPost.add(arm);
+
+      // Glowing Lamp
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), lampMat);
+      lamp.position.set(lp.x < 0 ? 1.4 : -1.4, 6.3, 0);
+      lightPost.add(lamp);
+
+      // PointLight illumination source
+      const pointLight = new THREE.PointLight(0xfffae0, 0, 32, 1.2);
+      pointLight.position.set(lp.x < 0 ? 1.4 : -1.4, 6.0, 0);
+      lightPost.add(pointLight);
+
+      this.streetlights.push(pointLight);
+      this.root.add(lightPost);
+    });
+
+    // 4. Milestone Markers
+    const milestoneGeo = new THREE.CylinderGeometry(0.25, 0.25, 1.0, 12);
+    const msWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const msYellowMat = new THREE.MeshStandardMaterial({ color: 0xffeb3b });
+
+    const ms1 = new THREE.Mesh(milestoneGeo, msWhiteMat);
+    ms1.position.set(4.8, 0.5, 5);
+    const msCap = new THREE.Mesh(new THREE.SphereGeometry(0.25, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), msYellowMat);
+    msCap.position.set(4.8, 1.0, 5);
+    this.root.add(ms1, msCap);
+  }
+
+  setStreetlightsActive(active) {
+    const intensity = active ? 1.6 : 0;
+    this.streetlights.forEach(l => {
+      l.intensity = intensity;
+    });
+  }
+}
+
+
+  // ==========================================
+  // MODULE: weather.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - Dynamic Weather & Day-Night System
+ * Controls sun/moon positions, atmospheric sky colors, dynamic fog,
+ * rain streak particle system, and environmental illumination.
+ */
+
+class WeatherSystem {
+  constructor(scene, THREE) {
+    this.scene = scene;
+    this.THREE = THREE;
+
+    this.currentWeather = 'sunny'; // 'sunny', 'cloudy', 'rainy', 'foggy'
+    this.currentTimeOfDay = 'morning'; // 'morning', 'afternoon', 'evening', 'night'
+
+    // Directional Sun / Moon light
+    this.sunLight = new THREE.DirectionalLight(0xfff3e0, 1.4);
+    this.sunLight.castShadow = true;
+    this.sunLight.shadow.mapSize.width = 2048;
+    this.sunLight.shadow.mapSize.height = 2048;
+    this.sunLight.shadow.camera.near = 1.0;
+    this.sunLight.shadow.camera.far = 400;
+    const d = 140;
+    this.sunLight.shadow.camera.left = -d;
+    this.sunLight.shadow.camera.right = d;
+    this.sunLight.shadow.camera.top = d;
+    this.sunLight.shadow.camera.bottom = -d;
+    this.sunLight.shadow.bias = -0.0005;
+
+    this.scene.add(this.sunLight);
+
+    // Ambient light
+    this.ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    this.scene.add(this.ambientLight);
+
+    // Hemispherical sky/ground light
+    this.hemiLight = new THREE.HemisphereLight(0x90caf9, 0x4e342e, 0.4);
+    this.scene.add(this.hemiLight);
+
+    // Rain Particle System
+    this.rainParticles = null;
+    this.rainCount = 1800;
+    this.rainGeometry = null;
+    this.rainMaterial = null;
+
+    this.initRain();
+    this.applyEnvironment();
+  }
+
+  initRain() {
+    const THREE = this.THREE;
+    this.rainGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(this.rainCount * 3);
+
+    for (let i = 0; i < this.rainCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 90;
+      positions[i * 3 + 1] = Math.random() * 45;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 90;
+    }
+
+    this.rainGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    this.rainMaterial = new THREE.PointsMaterial({
+      color: 0xbbdefb,
+      size: 0.28,
+      transparent: true,
+      opacity: 0.75
+    });
+
+    this.rainParticles = new THREE.Points(this.rainGeometry, this.rainMaterial);
+    this.rainParticles.visible = false;
+    this.scene.add(this.rainParticles);
+  }
+
+  setWeather(weather, audioManager = null) {
+    this.currentWeather = weather;
+    if (audioManager) {
+      audioManager.setRainSound(weather === 'rainy');
+    }
+    this.applyEnvironment();
+  }
+
+  setTimeOfDay(timeOfDay) {
+    this.currentTimeOfDay = timeOfDay;
+    this.applyEnvironment();
+  }
+
+  applyEnvironment() {
+    const THREE = this.THREE;
+
+    // Default daylight color profiles
+    let skyColor = 0x87ceeb;
+    let sunColor = 0xfff3e0;
+    let sunIntensity = 1.35;
+    let ambientIntensity = 0.45;
+    let sunPos = new THREE.Vector3(70, 110, 50);
+    let fogColor = 0xddeeff;
+    let fogNear = 80;
+    let fogFar = 320;
+
+    // Day-Night Lighting Profiles
+    switch (this.currentTimeOfDay) {
+      case 'morning':
+        skyColor = 0xffc482; // Warm Indian dawn
+        sunColor = 0xffb74d;
+        sunIntensity = 1.1;
+        ambientIntensity = 0.5;
+        sunPos.set(-120, 45, 60);
+        fogColor = 0xffd1a4;
+        break;
+      case 'afternoon':
+        skyColor = 0x4fc3f7; // Crisp high noon
+        sunColor = 0xffffff;
+        sunIntensity = 1.5;
+        ambientIntensity = 0.55;
+        sunPos.set(40, 150, 40);
+        fogColor = 0xb3e5fc;
+        break;
+      case 'evening':
+        skyColor = 0xe65100; // Rich golden sunset
+        sunColor = 0xff7043;
+        sunIntensity = 1.0;
+        ambientIntensity = 0.4;
+        sunPos.set(130, 30, -50);
+        fogColor = 0xffab91;
+        break;
+      case 'night':
+        skyColor = 0x050b14; // Deep village midnight
+        sunColor = 0x5c6bc0; // Moonlight
+        sunIntensity = 0.25;
+        ambientIntensity = 0.12;
+        sunPos.set(-50, 90, -70);
+        fogColor = 0x07111e;
+        fogNear = 40;
+        fogFar = 220;
+        break;
+    }
+
+    // Weather modifiers
+    if (this.currentWeather === 'cloudy') {
+      sunIntensity *= 0.65;
+      ambientIntensity *= 1.2;
+      skyColor = 0x90a4ae;
+      fogColor = 0x90a4ae;
+    } else if (this.currentWeather === 'rainy') {
+      sunIntensity *= 0.35;
+      ambientIntensity *= 0.9;
+      skyColor = 0x37474f;
+      fogColor = 0x37474f;
+      fogNear = 30;
+      fogFar = 160;
+    } else if (this.currentWeather === 'foggy') {
+      // Authentic North Indian winter morning fog (Dhund)
+      sunIntensity *= 0.4;
+      ambientIntensity *= 1.3;
+      fogNear = 10;
+      fogFar = 75;
+      fogColor = 0xeeeeee;
+      skyColor = 0xcccccc;
+    }
+
+    // Apply to lights
+    this.sunLight.color.setHex(sunColor);
+    this.sunLight.intensity = sunIntensity;
+    this.sunLight.position.copy(sunPos);
+
+    this.ambientLight.intensity = ambientIntensity;
+    this.scene.background = new THREE.Color(skyColor);
+    this.scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
+
+    // Rain particles toggle
+    if (this.rainParticles) {
+      this.rainParticles.visible = (this.currentWeather === 'rainy');
+    }
+  }
+
+  update(dt, tractorX, tractorZ) {
+    // Keep sun shadow frustum centered near tractor
+    this.sunLight.target.position.set(tractorX, 0, tractorZ);
+    this.sunLight.target.updateMatrixWorld();
+
+    // Animate rain streaks falling and wrapping around tractor
+    if (this.currentWeather === 'rainy' && this.rainParticles && this.rainParticles.visible) {
+      const positions = this.rainGeometry.attributes.position.array;
+      const speed = 48 * dt;
+
+      for (let i = 0; i < this.rainCount; i++) {
+        positions[i * 3 + 1] -= speed;
+
+        // Reset if below ground
+        if (positions[i * 3 + 1] < 0) {
+          positions[i * 3 + 1] = 40 + Math.random() * 5;
+          positions[i * 3] = tractorX + (Math.random() - 0.5) * 80;
+          positions[i * 3 + 2] = tractorZ + (Math.random() - 0.5) * 80;
+        }
+      }
+
+      this.rainGeometry.attributes.position.needsUpdate = true;
+    }
+  }
+}
+
+
+  // ==========================================
+  // MODULE: camera.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - Camera Controller
+ * Supports 5 working camera modes:
+ * 1. Third-Person Chase (smooth damping)
+ * 2. Close Rear (hitch alignment view)
+ * 3. Driver Cab First-Person (cockpit & hood view)
+ * 4. Front Bumper
+ * 5. Free Orbit Inspection
+ */
+
+class CameraController {
+  constructor(camera, THREE) {
+    this.camera = camera;
+    this.THREE = THREE;
+
+    this.modes = ['chase', 'close_rear', 'cab_driver', 'bumper', 'orbit'];
+    this.currentModeIndex = 0;
+    this.mode = 'chase';
+
+    // Camera smoothing targets
+    this.targetPos = new THREE.Vector3();
+    this.targetLook = new THREE.Vector3();
+    this.currentLook = new THREE.Vector3();
+
+    // Orbit parameters
+    this.orbitYaw = 0;
+    this.orbitPitch = 0.35;
+    this.orbitDistance = 8.5;
+    this.isDragging = false;
+    this.prevMouseX = 0;
+    this.prevMouseY = 0;
+
+    // Shake & engine vibration
+    this.vibrationAmount = 0;
+  }
+
+  setMode(mode) {
+    if (this.modes.includes(mode)) {
+      this.mode = mode;
+      this.currentModeIndex = this.modes.indexOf(mode);
+    }
+  }
+
+  cycleMode() {
+    this.currentModeIndex = (this.currentModeIndex + 1) % this.modes.length;
+    this.mode = this.modes[this.currentModeIndex];
+    return this.mode;
+  }
+
+  handlePointerDown(x, y) {
+    this.isDragging = true;
+    this.prevMouseX = x;
+    this.prevMouseY = y;
+  }
+
+  handlePointerMove(x, y) {
+    if (!this.isDragging) return;
+    const dx = x - this.prevMouseX;
+    const dy = y - this.prevMouseY;
+
+    this.orbitYaw -= dx * 0.006;
+    this.orbitPitch = Math.max(0.05, Math.min(1.4, this.orbitPitch + dy * 0.006));
+
+    this.prevMouseX = x;
+    this.prevMouseY = y;
+  }
+
+  handlePointerUp() {
+    this.isDragging = false;
+  }
+
+  handleZoom(delta) {
+    this.orbitDistance = Math.max(4.0, Math.min(22.0, this.orbitDistance + delta * 0.01));
+  }
+
+  update(dt, tractorX, tractorY, tractorZ, tractorHeading, tractorPitch, speed, rpm) {
+    const THREE = this.THREE;
+
+    // Small engine vibration when tractor is idling or revving
+    const vib = (rpm / 2400) * 0.015;
+    const vibOffset = Math.sin(Date.now() * 0.04) * vib;
+
+    switch (this.mode) {
+      case 'chase': {
+        // Positioned 7.5m behind, 3.2m above tractor
+        const dist = 7.5 + Math.min(3.5, Math.abs(speed) * 0.25);
+        const height = 3.2 + vibOffset;
+
+        const behindX = tractorX - Math.sin(tractorHeading) * dist;
+        const behindZ = tractorZ - Math.cos(tractorHeading) * dist;
+
+        this.targetPos.set(behindX, tractorY + height, behindZ);
+        this.targetLook.set(tractorX, tractorY + 1.2, tractorZ);
+
+        // Smooth spring interpolation
+        this.camera.position.lerp(this.targetPos, Math.min(1, dt * 7.0));
+        this.currentLook.lerp(this.targetLook, Math.min(1, dt * 10.0));
+        this.camera.lookAt(this.currentLook);
+        break;
+      }
+
+      case 'close_rear': {
+        // Tight 3.8m behind hitch - perfect for trailer reversing
+        const dist = 3.8;
+        const height = 1.9 + vibOffset;
+
+        const behindX = tractorX - Math.sin(tractorHeading) * dist;
+        const behindZ = tractorZ - Math.cos(tractorHeading) * dist;
+
+        this.targetPos.set(behindX, tractorY + height, behindZ);
+        this.targetLook.set(tractorX - Math.sin(tractorHeading) * 1.2, tractorY + 0.6, tractorZ - Math.cos(tractorHeading) * 1.2);
+
+        this.camera.position.lerp(this.targetPos, Math.min(1, dt * 12.0));
+        this.currentLook.lerp(this.targetLook, Math.min(1, dt * 12.0));
+        this.camera.lookAt(this.currentLook);
+        break;
+      }
+
+      case 'cab_driver': {
+        // Cockpit view: at the driver seat looking over the steering wheel and hood
+        const cabX = tractorX - Math.sin(tractorHeading) * 0.75;
+        const cabZ = tractorZ - Math.cos(tractorHeading) * 0.75;
+        const cabY = tractorY + 1.55 + vibOffset;
+
+        this.camera.position.set(cabX, cabY, cabZ);
+
+        // Look forward along hood
+        const lookX = tractorX + Math.sin(tractorHeading) * 8.0;
+        const lookZ = tractorZ + Math.cos(tractorHeading) * 8.0;
+        this.camera.lookAt(lookX, tractorY + 1.2, lookZ);
+        break;
+      }
+
+      case 'bumper': {
+        // Low front bumper camera
+        const frontX = tractorX + Math.sin(tractorHeading) * 1.8;
+        const frontZ = tractorZ + Math.cos(tractorHeading) * 1.8;
+
+        this.camera.position.set(frontX, tractorY + 0.45, frontZ);
+        const lookX = tractorX + Math.sin(tractorHeading) * 12.0;
+        const lookZ = tractorZ + Math.cos(tractorHeading) * 12.0;
+        this.camera.lookAt(lookX, tractorY + 0.4, lookZ);
+        break;
+      }
+
+      case 'orbit': {
+        // Orbit around tractor
+        const ox = tractorX + Math.sin(this.orbitYaw) * Math.cos(this.orbitPitch) * this.orbitDistance;
+        const oy = tractorY + Math.sin(this.orbitPitch) * this.orbitDistance + 1.0;
+        const oz = tractorZ + Math.cos(this.orbitYaw) * Math.cos(this.orbitPitch) * this.orbitDistance;
+
+        this.camera.position.set(ox, oy, oz);
+        this.camera.lookAt(tractorX, tractorY + 1.2, tractorZ);
+        break;
+      }
+    }
+  }
+}
+
+
+  // ==========================================
+  // MODULE: missions.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - Mission & Objective System
+ * Features 10 playable missions with real completion criteria,
+ * waypoint indicators, timers, rewards, and progression tracking.
+ */
+
+class MissionSystem {
+  constructor(worldManager, audioManager) {
+    this.worldManager = worldManager;
+    this.audioManager = audioManager;
+
+    this.activeMission = null;
+    this.completedMissions = new Set();
+    this.timer = 0;
+    this.isTimerActive = false;
+
+    // Define 10 Complete Missions
+    this.missions = [
+      {
+        id: 1,
+        title: 'Pind Ki Pehchan (Village Arrival)',
+        desc: 'Start your day at the farm shed. Drive the tractor along the dirt track to the Village Elder’s house.',
+        reward: 1500,
+        xp: 100,
+        target: { x: -45, z: -55, radius: 7.0, name: 'Village Elder House' },
+        timeLimit: 0,
+        check: (physics, world) => {
+          const dist = Math.hypot(physics.x - (-45), physics.z - (-55));
+          return dist <= 7.0 && Math.abs(physics.speed) < 1.0;
+        },
+        progress: (physics, world) => {
+          const dist = Math.hypot(physics.x - (-45), physics.z - (-55));
+          return Math.max(0, Math.min(100, (1 - dist / 60) * 100));
+        }
+      },
+      {
+        id: 2,
+        title: 'Traali Jodo (Hitch The Trolley)',
+        desc: 'Drive to the farm yard, reverse toward the tractor trolley hitch, and press [G] or [Attach] to connect.',
+        reward: 2000,
+        xp: 150,
+        target: { x: -20, z: -25, radius: 8.0, name: 'Farm Shed Trolley' },
+        timeLimit: 0,
+        check: (physics, world) => {
+          return physics.trolleyAttached === true;
+        },
+        progress: (physics, world) => {
+          return physics.trolleyAttached ? 100 : 30;
+        }
+      },
+      {
+        id: 3,
+        title: 'Mandi Ki Sair (Wheat Delivery)',
+        desc: 'Towing the loaded trolley with 10 bags of golden wheat, cross the canal bridge and deliver to Kisan Mandi.',
+        reward: 5000,
+        xp: 350,
+        target: { x: -140, z: -120, radius: 9.0, name: 'Kisan Mandi Drop Zone' },
+        timeLimit: 180,
+        setup: (physics) => {
+          if (!physics.trolleyAttached) physics.attachTrolley();
+          physics.trolleyCargoCount = 10;
+        },
+        check: (physics, world) => {
+          const dist = Math.hypot(physics.x - (-140), physics.z - (-120));
+          return physics.trolleyAttached && dist <= 9.0 && Math.abs(physics.speed) < 0.8;
+        },
+        progress: (physics, world) => {
+          const dist = Math.hypot(physics.x - (-140), physics.z - (-120));
+          return Math.max(0, Math.min(100, (1 - dist / 180) * 100));
+        }
+      },
+      {
+        id: 4,
+        title: 'Khet Ki Jutaai (Soil Cultivation)',
+        desc: 'Drive to Field #1, press [E] to lower the cultivator, and till at least 60% of the soil patches.',
+        reward: 4000,
+        xp: 300,
+        target: { x: -75, z: 85, radius: 45.0, name: 'Wheat Field #1' },
+        timeLimit: 0,
+        setup: (physics) => {
+          physics.implementAttached = 'cultivator';
+        },
+        check: (physics, world) => {
+          let cultivated = 0;
+          const patches = world.field1.patches;
+          for (const p of patches) {
+            if (p.state >= 1) cultivated++;
+          }
+          return (cultivated / patches.length) >= 0.60;
+        },
+        progress: (physics, world) => {
+          let cultivated = 0;
+          const patches = world.field1.patches;
+          for (const p of patches) {
+            if (p.state >= 1) cultivated++;
+          }
+          return Math.min(100, (cultivated / (patches.length * 0.60)) * 100);
+        }
+      },
+      {
+        id: 5,
+        title: 'Gehun Ki Buvaai (Wheat Sowing)',
+        desc: 'Attach the seed drill and sow wheat seeds across the cultivated rows until at least 50% are seeded.',
+        reward: 4500,
+        xp: 320,
+        target: { x: -75, z: 85, radius: 45.0, name: 'Wheat Field #1' },
+        timeLimit: 0,
+        setup: (physics) => {
+          physics.implementAttached = 'seed_drill';
+        },
+        check: (physics, world) => {
+          let seeded = 0;
+          const patches = world.field1.patches;
+          for (const p of patches) {
+            if (p.state >= 2) seeded++;
+          }
+          return (seeded / patches.length) >= 0.50;
+        },
+        progress: (physics, world) => {
+          let seeded = 0;
+          const patches = world.field1.patches;
+          for (const p of patches) {
+            if (p.state >= 2) seeded++;
+          }
+          return Math.min(100, (seeded / (patches.length * 0.50)) * 100);
+        }
+      },
+      {
+        id: 6,
+        title: 'Ganna Dhulaai (Sugarcane Transport)',
+        desc: 'Load sugarcane at Field #3 and haul the heavy trailer across the village road to the collection centre.',
+        reward: 6500,
+        xp: 450,
+        target: { x: -45, z: -55, radius: 9.0, name: 'Village Collection Center' },
+        timeLimit: 150,
+        setup: (physics) => {
+          if (!physics.trolleyAttached) physics.attachTrolley();
+          physics.trolleyCargoCount = 10;
+        },
+        check: (physics, world) => {
+          const dist = Math.hypot(physics.x - (-45), physics.z - (-55));
+          return physics.trolleyAttached && dist <= 9.0 && Math.abs(physics.speed) < 0.8;
+        },
+        progress: (physics, world) => {
+          const dist = Math.hypot(physics.x - (-45), physics.z - (-55));
+          return Math.max(0, Math.min(100, (1 - dist / 150) * 100));
+        }
+      },
+      {
+        id: 7,
+        title: 'Dal-dal Ka Safar (Muddy Trail Crossing)',
+        desc: 'Tackle the slippery mud trail in the southern fields. Maintain traction and reach the checkpoint.',
+        reward: 4000,
+        xp: 250,
+        target: { x: 65, z: -140, radius: 8.0, name: 'Mud Trail Exit' },
+        timeLimit: 120,
+        check: (physics, world) => {
+          const dist = Math.hypot(physics.x - 65, physics.z - (-140));
+          return dist <= 8.0;
+        },
+        progress: (physics, world) => {
+          const dist = Math.hypot(physics.x - 65, physics.z - (-140));
+          return Math.max(0, Math.min(100, (1 - dist / 110) * 100));
+        }
+      },
+      {
+        id: 8,
+        title: 'Tubewell Chaalu Karo (Irrigation Pump)',
+        desc: 'The crops are drying up! Rush to the village tubewell boring pump house within 90 seconds.',
+        reward: 3500,
+        xp: 200,
+        target: { x: 35, z: 25, radius: 7.0, name: 'Tubewell Pump House' },
+        timeLimit: 90,
+        check: (physics, world) => {
+          const dist = Math.hypot(physics.x - 35, physics.z - 25);
+          return dist <= 7.0 && Math.abs(physics.speed) < 0.8;
+        },
+        progress: (physics, world) => {
+          const dist = Math.hypot(physics.x - 35, physics.z - 25);
+          return Math.max(0, Math.min(100, (1 - dist / 80) * 100));
+        }
+      },
+      {
+        id: 9,
+        title: 'Raat Ki Delivery (Night Rush Cargo)',
+        desc: 'Night has fallen! Turn on your headlights [L] and rush emergency fertilizer bags to the farm house.',
+        reward: 7000,
+        xp: 500,
+        target: { x: -45, z: -55, radius: 8.0, name: 'Village Farmhouse' },
+        timeLimit: 110,
+        setup: (physics, weather) => {
+          if (weather) weather.setTimeOfDay('night');
+        },
+        check: (physics, world) => {
+          const dist = Math.hypot(physics.x - (-45), physics.z - (-55));
+          return dist <= 8.0 && Math.abs(physics.speed) < 0.8;
+        },
+        progress: (physics, world) => {
+          const dist = Math.hypot(physics.x - (-45), physics.z - (-55));
+          return Math.max(0, Math.min(100, (1 - dist / 120) * 100));
+        }
+      },
+      {
+        id: 10,
+        title: 'Maha Kisan Championship (Grand Tour)',
+        desc: 'The ultimate farming challenge! Till Field #1 to 70%, hook up the harvest trolley, and deliver to Mandi.',
+        reward: 15000,
+        xp: 1000,
+        target: { x: -140, z: -120, radius: 9.0, name: 'Kisan Mandi Finish Line' },
+        timeLimit: 260,
+        check: (physics, world) => {
+          let cultivated = 0;
+          const patches = world.field1.patches;
+          for (const p of patches) {
+            if (p.state >= 1) cultivated++;
+          }
+          const fieldReady = (cultivated / patches.length) >= 0.70;
+          const atMandi = Math.hypot(physics.x - (-140), physics.z - (-120)) <= 9.0;
+          return fieldReady && physics.trolleyAttached && atMandi;
+        },
+        progress: (physics, world) => {
+          let cultivated = 0;
+          const patches = world.field1.patches;
+          for (const p of patches) {
+            if (p.state >= 1) cultivated++;
+          }
+          const fieldPct = Math.min(50, (cultivated / (patches.length * 0.70)) * 50);
+          const dist = Math.hypot(physics.x - (-140), physics.z - (-120));
+          const travelPct = physics.trolleyAttached ? Math.max(0, Math.min(50, (1 - dist / 200) * 50)) : 0;
+          return fieldPct + travelPct;
+        }
+      }
+    ];
+  }
+
+  startMission(id, physics, weather = null) {
+    const mission = this.missions.find(m => m.id === id);
+    if (!mission) return null;
+
+    this.activeMission = mission;
+    if (mission.timeLimit > 0) {
+      this.timer = mission.timeLimit;
+      this.isTimerActive = true;
+    } else {
+      this.timer = 0;
+      this.isTimerActive = false;
+    }
+
+    if (mission.setup) {
+      mission.setup(physics, weather);
+    }
+
+    return mission;
+  }
+
+  update(dt, physics, onComplete, onFail) {
+    if (!this.activeMission) return null;
+
+    // Timer countdown
+    if (this.isTimerActive) {
+      this.timer -= dt;
+      if (this.timer <= 0) {
+        this.timer = 0;
+        this.isTimerActive = false;
+        const failedMission = this.activeMission;
+        this.activeMission = null;
+        if (onFail) onFail(failedMission);
+        return { status: 'failed', mission: failedMission };
+      }
+    }
+
+    // Distance to objective
+    const distToTarget = Math.hypot(
+      physics.x - this.activeMission.target.x,
+      physics.z - this.activeMission.target.z
+    );
+
+    // Progress percentage
+    const progress = this.activeMission.progress(physics, this.worldManager);
+
+    // Check completion condition
+    if (this.activeMission.check(physics, this.worldManager)) {
+      const completed = this.activeMission;
+      this.completedMissions.add(completed.id);
+      this.activeMission = null;
+      this.isTimerActive = false;
+      if (this.audioManager) this.audioManager.playMissionSuccess();
+      if (onComplete) onComplete(completed);
+      return { status: 'completed', mission: completed };
+    }
+
+    return {
+      status: 'active',
+      mission: this.activeMission,
+      distance: Math.round(distToTarget),
+      progress: Math.min(100, Math.round(progress)),
+      timer: Math.ceil(this.timer)
+    };
+  }
+
+  cancelActiveMission() {
+    this.activeMission = null;
+    this.isTimerActive = false;
+    this.timer = 0;
+  }
+}
+
+
+  // ==========================================
+  // MODULE: save.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - Save & Load Manager
+ * Persists player progression, unlocked tractors, customization,
+ * completed missions, and preferences to LocalStorage with fallback validation.
+ */
+
+const SAVE_KEY = 'indian_tractor_simulator_save_v1';
+
+class SaveSystem {
+  constructor() {
+    this.defaultData = {
+      coins: 5000, // Starting bonus ₹5,000
+      xp: 0,
+      level: 1,
+      selectedTractor: 'sher855',
+      unlockedTractors: ['sher855'],
+      customizations: {
+        bodyColor: 0x0d47a1, // Swaraj Blue
+        rimColor: 0xeeeeee,
+        canopy: true,
+        bumper: 'heavy_iron'
+      },
+      completedMissions: [],
+      soundSettings: {
+        master: 0.85,
+        engine: 0.8,
+        ambient: 0.5,
+        effects: 0.9,
+        ui: 0.7,
+        muted: false
+      },
+      graphicsSettings: {
+        quality: 'high', // 'low', 'medium', 'high'
+        shadows: true,
+        particles: true
+      },
+      controlsSettings: {
+        steeringMode: 'buttons', // 'buttons', 'slider'
+        steerSensitivity: 1.0,
+        speedUnit: 'kmh' // 'kmh', 'mph'
+      }
+    };
+
+    this.data = this.load();
+  }
+
+  load() {
+    try {
+      const saved = localStorage.getItem(SAVE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...this.defaultData,
+          ...parsed,
+          customizations: { ...this.defaultData.customizations, ...(parsed.customizations || {}) },
+          soundSettings: { ...this.defaultData.soundSettings, ...(parsed.soundSettings || {}) },
+          graphicsSettings: { ...this.defaultData.graphicsSettings, ...(parsed.graphicsSettings || {}) },
+          controlsSettings: { ...this.defaultData.controlsSettings, ...(parsed.controlsSettings || {}) }
+        };
+      }
+    } catch (e) {
+      console.warn('Could not read save data, using defaults:', e);
+    }
+    return JSON.parse(JSON.stringify(this.defaultData));
+  }
+
+  save() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(this.data));
+      return true;
+    } catch (e) {
+      console.error('Failed to save to localStorage:', e);
+      return false;
+    }
+  }
+
+  addReward(coins, xp) {
+    this.data.coins += Math.max(0, coins);
+    this.data.xp += Math.max(0, xp);
+
+    // Level progression (each level requires Level * 500 XP)
+    const requiredXP = this.data.level * 500;
+    if (this.data.xp >= requiredXP) {
+      this.data.level += 1;
+    }
+    this.save();
+  }
+
+  unlockTractor(tractorId, cost = 0) {
+    if (this.data.coins >= cost && !this.data.unlockedTractors.includes(tractorId)) {
+      this.data.coins -= cost;
+      this.data.unlockedTractors.push(tractorId);
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  selectTractor(tractorId) {
+    if (this.data.unlockedTractors.includes(tractorId)) {
+      this.data.selectedTractor = tractorId;
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  setCustomization(key, value) {
+    this.data.customizations[key] = value;
+    this.save();
+  }
+
+  markMissionCompleted(missionId) {
+    if (!this.data.completedMissions.includes(missionId)) {
+      this.data.completedMissions.push(missionId);
+      this.save();
+    }
+  }
+
+  resetProgress() {
+    this.data = JSON.parse(JSON.stringify(this.defaultData));
+    this.save();
+    return this.data;
+  }
+}
+
+
+  // ==========================================
+  // MODULE: ui.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - User Interface & HUD System
+ * Manages Main Menu, Garage, In-Game HUD, Minimap, Fullscreen Map,
+ * Mobile Touch Controls, Pause Menu, Settings, and Mission Dialogs.
+ */
+
+class UIManager {
+  constructor(game) {
+    this.game = game;
+    this.currentScreen = 'menu'; // 'menu', 'game', 'garage', 'missions', 'map', 'settings', 'controls', 'how_to_play', 'about'
+
+    // DOM Elements cache
+    this.container = document.getElementById('ui-root');
+    this.minimapCanvas = null;
+    this.minimapCtx = null;
+  }
+
+  init() {
+    this.render();
+    this.setupGlobalEvents();
+  }
+
+  showScreen(screen) {
+    this.currentScreen = screen;
+    this.render();
+    if (this.game.audio) this.game.audio.playUIClick();
+  }
+
+  render() {
+    if (!this.container) return;
+
+    let content = '';
+    switch (this.currentScreen) {
+      case 'menu':
+        content = this.renderMainMenu();
+        break;
+      case 'game':
+        content = this.renderGameHUD();
+        break;
+      case 'garage':
+        content = this.renderGarage();
+        break;
+      case 'missions':
+        content = this.renderMissionsList();
+        break;
+      case 'map':
+        content = this.renderFullscreenMap();
+        break;
+      case 'settings':
+        content = this.renderSettings();
+        break;
+      case 'controls':
+        content = this.renderControlsGuide();
+        break;
+      case 'how_to_play':
+        content = this.renderHowToPlay();
+        break;
+      case 'about':
+        content = this.renderAbout();
+        break;
+    }
+
+    this.container.innerHTML = content;
+    this.bindEvents();
+
+    if (this.currentScreen === 'game') {
+      this.initMinimap();
+      this.initTouchControls();
+    }
+  }
+
+  // ==========================================
+  // MAIN MENU
+  // ==========================================
+
+  renderMainMenu() {
+    const save = this.game.save.data;
+    const completedCount = save.completedMissions.length;
+
+    return `
+      <div class="menu-overlay">
+        <!-- Header Banner -->
+        <div class="menu-header">
+          <div class="badge-flag">🇮🇳 DESI FARMING SIMULATOR</div>
+          <h1 class="game-title">INDIAN TRACTOR<br/><span class="highlight">SIMULATOR 3D</span></h1>
+          <p class="game-tagline">Real-Time Open-World Rural Agricultural Simulator</p>
+          <div class="player-stats-bar">
+            <span>💰 ₹${save.coins.toLocaleString('en-IN')}</span>
+            <span>⭐ Level ${save.level} (${save.xp} XP)</span>
+            <span>🏆 Missions: ${completedCount}/10</span>
+          </div>
+        </div>
+
+        <!-- Menu Action Grid -->
+        <div class="menu-grid">
+          <button class="btn btn-primary" id="btn-play">
+            <span class="btn-icon">▶</span>
+            <span class="btn-text">PLAY GAME</span>
+            <span class="btn-sub">Open World Rural Village</span>
+          </button>
+
+          <button class="btn btn-secondary" id="btn-quick-drive">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">QUICK DRIVE</span>
+            <span class="btn-sub">Immediate Free Roam</span>
+          </button>
+
+          <button class="btn btn-secondary" id="btn-garage">
+            <span class="btn-icon">🚜</span>
+            <span class="btn-text">TRACTOR GARAGE</span>
+            <span class="btn-sub">Select & Customize Vehicles</span>
+          </button>
+
+          <button class="btn btn-secondary" id="btn-missions">
+            <span class="btn-icon">🎯</span>
+            <span class="btn-text">MISSIONS (${completedCount}/10)</span>
+            <span class="btn-sub">Farming, Transport & Challenges</span>
+          </button>
+
+          <button class="btn btn-secondary" id="btn-map">
+            <span class="btn-icon">🗺️</span>
+            <span class="btn-text">VILLAGE MAP</span>
+            <span class="btn-sub">Explore Fields & Mandi</span>
+          </button>
+
+          <button class="btn btn-secondary" id="btn-settings">
+            <span class="btn-icon">⚙️</span>
+            <span class="btn-text">SETTINGS</span>
+            <span class="btn-sub">Sound, Graphics & Controls</span>
+          </button>
+
+          <button class="btn btn-outline" id="btn-controls">
+            <span class="btn-icon">🎮</span>
+            <span class="btn-text">CONTROLS GUIDE</span>
+          </button>
+
+          <button class="btn btn-outline" id="btn-how-to-play">
+            <span class="btn-icon">📖</span>
+            <span class="btn-text">HOW TO PLAY</span>
+          </button>
+
+          <button class="btn btn-outline" id="btn-new-game">
+            <span class="btn-icon">🔄</span>
+            <span class="btn-text">NEW GAME</span>
+          </button>
+
+          <button class="btn btn-outline" id="btn-about">
+            <span class="btn-icon">ℹ️</span>
+            <span class="btn-text">ABOUT</span>
+          </button>
+        </div>
+
+        <div class="menu-footer">
+          <span>v1.0.0 • Pure WebGL & Web Audio API • 100% Free & Playable</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // IN-GAME HUD
+  // ==========================================
+
+  renderGameHUD() {
+    const save = this.game.save.data;
+    const mission = this.game.missions.activeMission;
+
+    return `
+      <div class="hud-overlay">
+        <!-- Top Status Bar -->
+        <div class="hud-top-bar">
+          <div class="hud-stats">
+            <div class="stat-pill">💰 ₹<span id="hud-coins">${save.coins.toLocaleString('en-IN')}</span></div>
+            <div class="stat-pill">⭐ Lvl <span id="hud-level">${save.level}</span></div>
+          </div>
+
+          <div class="hud-center-controls">
+            <!-- Time & Weather Quick Toggles -->
+            <button class="pill-btn" id="hud-btn-weather">🌤️ <span id="hud-weather-val">Sunny</span></button>
+            <button class="pill-btn" id="hud-btn-time">☀️ <span id="hud-time-val">Morning</span></button>
+            <button class="pill-btn" id="hud-btn-cam">📷 <span id="hud-cam-val">Chase</span></button>
+          </div>
+
+          <div class="hud-top-right">
+            <button class="icon-btn" id="hud-btn-map" title="Map (M)">🗺️</button>
+            <button class="icon-btn" id="hud-btn-pause" title="Pause (P / Esc)">⏸️</button>
+          </div>
+        </div>
+
+        <!-- Minimap Radar -->
+        <div class="minimap-container">
+          <canvas id="minimap-canvas" width="160" height="160"></canvas>
+          <div class="minimap-label">GPS RADAR</div>
+        </div>
+
+        <!-- Mission Objective HUD Card -->
+        <div class="mission-card ${mission ? 'active' : 'hidden'}" id="mission-card">
+          <div class="mission-card-header">
+            <span class="mission-badge">ACTIVE MISSION</span>
+            <span class="mission-timer" id="mission-timer-text"></span>
+          </div>
+          <div class="mission-title" id="mission-card-title">${mission ? mission.title : ''}</div>
+          <div class="mission-desc" id="mission-card-desc">${mission ? mission.desc : ''}</div>
+          <div class="mission-progress-bar">
+            <div class="progress-fill" id="mission-progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="mission-dist-text" id="mission-dist-text">Distance: -- m</div>
+        </div>
+
+        <!-- Equipment / Implement Status Card -->
+        <div class="implement-card" id="implement-card">
+          <div class="impl-icon" id="impl-icon">🚜</div>
+          <div class="impl-info">
+            <div class="impl-name" id="impl-name">Tractor Solo</div>
+            <div class="impl-state" id="impl-state">Ready for hitching [G]</div>
+          </div>
+        </div>
+
+        <!-- Bottom Dashboard Cluster (Speed, RPM, Gear, Fuel) -->
+        <div class="hud-dashboard">
+          <div class="dash-dial rpm-dial">
+            <div class="dial-label">ENGINE RPM</div>
+            <div class="dial-value"><span id="dash-rpm">750</span></div>
+            <div class="dial-bar-bg"><div class="dial-bar-fill" id="rpm-bar" style="width: 25%"></div></div>
+          </div>
+
+          <div class="dash-dial speed-dial">
+            <div class="dial-label">SPEED</div>
+            <div class="dial-value"><span id="dash-speed">0</span> <span class="unit">KM/H</span></div>
+            <div class="dash-gear" id="dash-gear">D1</div>
+          </div>
+
+          <div class="dash-indicators">
+            <span class="ind-icon" id="ind-engine" title="Engine Status">⚡</span>
+            <span class="ind-icon" id="ind-light" title="Headlights">💡</span>
+            <span class="ind-icon" id="ind-brake" title="Handbrake">🛑</span>
+            <span class="ind-icon" id="ind-fuel" title="Diesel Fuel">⛽</span>
+          </div>
+        </div>
+
+        <!-- Mobile Touch Controls Layout -->
+        <div class="mobile-controls-layer">
+          <!-- Left Steering Controls -->
+          <div class="mobile-left-cluster">
+            <button class="touch-btn steer-btn" id="touch-steer-left">◀</button>
+            <button class="touch-btn steer-btn" id="touch-steer-right">▶</button>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="mobile-center-actions">
+            <button class="action-btn" id="touch-horn">📢 HORN</button>
+            <button class="action-btn" id="touch-lights">💡 LIGHTS</button>
+            <button class="action-btn" id="touch-hitch">🔗 HITCH</button>
+            <button class="action-btn" id="touch-implement">🌾 TOOL [E]</button>
+            <button class="action-btn" id="touch-reset">🔄 RESET</button>
+          </div>
+
+          <!-- Right Pedals (Gas & Brake/Reverse) -->
+          <div class="mobile-right-cluster">
+            <button class="touch-btn pedal-btn brake-pedal" id="touch-brake">
+              <span class="pedal-icon">🛑</span>
+              <span class="pedal-label">BRAKE<br/>/ REV</span>
+            </button>
+            <button class="touch-btn pedal-btn gas-pedal" id="touch-gas">
+              <span class="pedal-icon">⚡</span>
+              <span class="pedal-label">RACE<br/>GAS</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div class="toast-notification" id="toast-notify"></div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // TRACTOR GARAGE & CUSTOMIZATION
+  // ==========================================
+
+  renderGarage() {
+    const save = this.game.save.data;
+    const tractors = [
+      {
+        id: 'sher855',
+        name: 'Desi Sher 855',
+        brand: 'Classic Swaraj Heritage',
+        cost: 0,
+        hp: 55,
+        speed: '36 km/h',
+        color: 'Swaraj Blue',
+        desc: 'The iconic blue powerhouse of Punjab. Famous for supreme low-end torque in puddles and heavy trolleys.'
+      },
+      {
+        id: 'samrat575',
+        name: 'Kisan Samrat 575',
+        brand: 'Mahindra Red Bull',
+        cost: 6000,
+        hp: 60,
+        speed: '35 km/h',
+        color: 'Mahindra Red',
+        desc: 'Traditional agricultural workhorse. Heavy iron bumper, cyclone air filter, and unbeatable fuel efficiency.'
+      },
+      {
+        id: 'raftaar5050',
+        name: 'Raftaar Green 5050',
+        brand: 'Punjab Turbo Farm Power',
+        cost: 12000,
+        hp: 75,
+        speed: '38 km/h',
+        color: 'Punjab Green',
+        desc: 'Modern aerodynamic turbo-charged tractor. Superior road cruising speed and heavy sugarcane towing power.'
+      }
+    ];
+
+    const currentTractor = tractors.find(t => t.id === save.selectedTractor) || tractors[0];
+
+    return `
+      <div class="garage-overlay">
+        <div class="garage-header">
+          <button class="back-btn" id="garage-back">◀ BACK TO MENU</button>
+          <div class="garage-title">TRACTOR SHOWROOM & GARAGE</div>
+          <div class="garage-wallet">💰 ₹${save.coins.toLocaleString('en-IN')}</div>
+        </div>
+
+        <div class="garage-content">
+          <!-- Left Vehicle Card -->
+          <div class="garage-card">
+            <div class="tractor-brand">${currentTractor.brand}</div>
+            <div class="tractor-name">${currentTractor.name}</div>
+            <p class="tractor-desc">${currentTractor.desc}</p>
+
+            <div class="spec-grid">
+              <div class="spec-item">
+                <span class="spec-lbl">POWER</span>
+                <span class="spec-val">${currentTractor.hp} HP</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-lbl">MAX SPEED</span>
+                <span class="spec-val">${currentTractor.speed}</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-lbl">TRACTION</span>
+                <span class="spec-val">Dual Agri Lugs</span>
+              </div>
+            </div>
+
+            <!-- Vehicle Selector Tabs -->
+            <div class="tractor-tabs">
+              ${tractors.map(t => {
+                const isUnlocked = save.unlockedTractors.includes(t.id);
+                const isSelected = save.selectedTractor === t.id;
+                return `
+                  <button class="tab-btn ${isSelected ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" data-tractor="${t.id}">
+                    ${t.name}
+                    ${isSelected ? '✔' : (!isUnlocked ? `🔒 ₹${t.cost.toLocaleString('en-IN')}` : '')}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Custom Paint Palette -->
+            <div class="custom-section">
+              <div class="section-title">DESI BODY PAINT</div>
+              <div class="color-palette">
+                <button class="color-swatch" data-color="0x0d47a1" style="background:#0d47a1" title="Swaraj Blue"></button>
+                <button class="color-swatch" data-color="0xc62828" style="background:#c62828" title="Mahindra Red"></button>
+                <button class="color-swatch" data-color="0x2e7d32" style="background:#2e7d32" title="Punjab Green"></button>
+                <button class="color-swatch" data-color="0x212121" style="background:#212121" title="Sonalika Black"></button>
+                <button class="color-swatch" data-color="0xffb300" style="background:#ffb300" title="Golden Saffron"></button>
+              </div>
+            </div>
+
+            <!-- Wheel Rims Palette -->
+            <div class="custom-section">
+              <div class="section-title">WHEEL RIMS</div>
+              <div class="color-palette">
+                <button class="rim-swatch" data-rim="0xeeeeee" style="background:#eeeeee" title="Classic Silver"></button>
+                <button class="rim-swatch" data-rim="0xffeb3b" style="background:#ffeb3b" title="Yellow"></button>
+                <button class="rim-swatch" data-rim="0xd32f2f" style="background:#d32f2f" title="Bold Red"></button>
+                <button class="rim-swatch" data-rim="0x424242" style="background:#424242" title="Gunmetal"></button>
+              </div>
+            </div>
+
+            <div class="garage-action-area">
+              <button class="btn btn-primary" id="garage-drive-btn">DRIVE THIS TRACTOR</button>
+            </div>
+          </div>
+
+          <!-- Right 3D Turntable Prompt -->
+          <div class="garage-hint">
+            <span>💡 Drag to rotate 3D tractor view • Scroll to zoom</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // MISSIONS LIST SCREEN
+  // ==========================================
+
+  renderMissionsList() {
+    const missions = this.game.missions.missions;
+    const save = this.game.save.data;
+
+    return `
+      <div class="modal-overlay">
+        <div class="modal-box modal-large">
+          <div class="modal-header">
+            <h2>FARMING & TRANSPORT MISSIONS</h2>
+            <button class="close-modal" id="modal-close">✕</button>
+          </div>
+          <div class="modal-body mission-scroll-list">
+            ${missions.map(m => {
+              const isCompleted = save.completedMissions.includes(m.id);
+              return `
+                <div class="mission-item ${isCompleted ? 'completed' : ''}">
+                  <div class="mission-num">#${m.id}</div>
+                  <div class="mission-details">
+                    <div class="mission-item-title">${m.title} ${isCompleted ? '🏆 COMPLETED' : ''}</div>
+                    <div class="mission-item-desc">${m.desc}</div>
+                    <div class="mission-item-rewards">
+                      <span>💰 ₹${m.reward.toLocaleString('en-IN')}</span>
+                      <span>⭐ +${m.xp} XP</span>
+                      ${m.timeLimit > 0 ? `<span>⏱️ Limit: ${m.timeLimit}s</span>` : ''}
+                    </div>
+                  </div>
+                  <button class="btn btn-sm ${isCompleted ? 'btn-outline' : 'btn-primary'} btn-start-mission" data-id="${m.id}">
+                    ${isCompleted ? 'REPLAY' : 'START'}
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // FULLSCREEN INTERACTIVE MAP
+  // ==========================================
+
+  renderFullscreenMap() {
+    return `
+      <div class="modal-overlay">
+        <div class="modal-box modal-large">
+          <div class="modal-header">
+            <h2>VILLAGE NAVIGATION MAP (PIND RADAR)</h2>
+            <button class="close-modal" id="modal-close">✕</button>
+          </div>
+          <div class="modal-body map-screen-body">
+            <div class="map-grid-legend">
+              <div class="legend-item"><span class="leg-color" style="background:#4caf50"></span> Farm Yard Shed (Start)</div>
+              <div class="legend-item"><span class="leg-color" style="background:#2196f3"></span> Village Elder House</div>
+              <div class="legend-item"><span class="leg-color" style="background:#ff9800"></span> Kisan Mandi (Market)</div>
+              <div class="legend-item"><span class="leg-color" style="background:#00bcd4"></span> Canal Bridge</div>
+              <div class="legend-item"><span class="leg-color" style="background:#00e676"></span> Tubewell Boring Pump</div>
+              <div class="legend-item"><span class="leg-color" style="background:#ffeb3b"></span> Field #1 (Wheat Crop)</div>
+              <div class="legend-item"><span class="leg-color" style="background:#ffd600"></span> Field #2 (Mustard / Sarson)</div>
+              <div class="legend-item"><span class="leg-color" style="background:#8bc34a"></span> Field #3 (Sugarcane / Ganna)</div>
+              <div class="legend-item"><span class="leg-color" style="background:#795548"></span> Southern Muddy Trail</div>
+            </div>
+            <div class="map-canvas-wrapper">
+              <canvas id="fullscreen-map-canvas" width="460" height="460"></canvas>
+            </div>
+            <p class="map-note">Your tractor is represented by the glowing red arrow. Active mission destinations are pulsing beacons.</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // SETTINGS MENU
+  // ==========================================
+
+  renderSettings() {
+    const sound = this.game.save.data.soundSettings;
+    const graphics = this.game.save.data.graphicsSettings;
+
+    return `
+      <div class="modal-overlay">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h2>GAME SETTINGS</h2>
+            <button class="close-modal" id="modal-close">✕</button>
+          </div>
+          <div class="modal-body settings-body">
+            <!-- Audio Settings -->
+            <div class="setting-group">
+              <h3>🔊 AUDIO CHANNELS</h3>
+              <div class="slider-row">
+                <span>Master Volume</span>
+                <input type="range" id="vol-master" min="0" max="1" step="0.05" value="${sound.master}" />
+              </div>
+              <div class="slider-row">
+                <span>Diesel Engine</span>
+                <input type="range" id="vol-engine" min="0" max="1" step="0.05" value="${sound.engine}" />
+              </div>
+              <div class="slider-row">
+                <span>Environment & Wind</span>
+                <input type="range" id="vol-ambient" min="0" max="1" step="0.05" value="${sound.ambient}" />
+              </div>
+              <div class="slider-row">
+                <span>Horn & Hitch Effects</span>
+                <input type="range" id="vol-effects" min="0" max="1" step="0.05" value="${sound.effects}" />
+              </div>
+              <div class="toggle-row">
+                <span>Mute All Audio</span>
+                <input type="checkbox" id="chk-mute" ${sound.muted ? 'checked' : ''} />
+              </div>
+            </div>
+
+            <!-- Graphics Settings -->
+            <div class="setting-group">
+              <h3>🎨 GRAPHICS & PERFORMANCE</h3>
+              <div class="toggle-row">
+                <span>Preset Quality</span>
+                <select id="sel-quality">
+                  <option value="high" ${graphics.quality === 'high' ? 'selected' : ''}>High (Detailed Shadows)</option>
+                  <option value="medium" ${graphics.quality === 'medium' ? 'selected' : ''}>Medium (Balanced)</option>
+                  <option value="low" ${graphics.quality === 'low' ? 'selected' : ''}>Low (Max Mobile Performance)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // CONTROLS GUIDE
+  // ==========================================
+
+  renderControlsGuide() {
+    return `
+      <div class="modal-overlay">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h2>CONTROLS GUIDE</h2>
+            <button class="close-modal" id="modal-close">✕</button>
+          </div>
+          <div class="modal-body">
+            <table class="controls-table">
+              <thead><tr><th>KEY / BUTTON</th><th>ACTION</th></tr></thead>
+              <tbody>
+                <tr><td><strong>W / Up Arrow / Gas Pedal</strong></td><td>Accelerate Tractor</td></tr>
+                <tr><td><strong>S / Down Arrow / Brake Pedal</strong></td><td>Brake / Reverse</td></tr>
+                <tr><td><strong>A / Left / Steer Left</strong></td><td>Steer Left</td></tr>
+                <tr><td><strong>D / Right / Steer Right</strong></td><td>Steer Right</td></tr>
+                <tr><td><strong>Space / Handbrake</strong></td><td>Handbrake Lock</td></tr>
+                <tr><td><strong>H / Horn Button</strong></td><td>Punjabi Pressure Horn</td></tr>
+                <tr><td><strong>L / Lights Button</strong></td><td>Toggle Headlights</td></tr>
+                <tr><td><strong>G / Hitch Button</strong></td><td>Attach / Detach Trolley</td></tr>
+                <tr><td><strong>E / Tool Button</strong></td><td>Lower / Raise Farming Implement</td></tr>
+                <tr><td><strong>C / Camera Button</strong></td><td>Cycle Camera (5 Modes)</td></tr>
+                <tr><td><strong>R / Reset Button</strong></td><td>Reset / Upright Tractor</td></tr>
+                <tr><td><strong>M / Map Button</strong></td><td>Open Fullscreen Map</td></tr>
+                <tr><td><strong>P / Esc / Pause</strong></td><td>Pause / Resume Menu</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // HOW TO PLAY
+  // ==========================================
+
+  renderHowToPlay() {
+    return `
+      <div class="modal-overlay">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h2>HOW TO PLAY — DESI KISAN GUIDE</h2>
+            <button class="close-modal" id="modal-close">✕</button>
+          </div>
+          <div class="modal-body text-content">
+            <h3>1. Driving Your Tractor</h3>
+            <p>Your tractor handles with realistic momentum, gears, and tire friction. Paved village roads allow fast cruising, while muddy trails and ploughed soil offer higher resistance.</p>
+
+            <h3>2. Hitching the Trolley (Desi Traali)</h3>
+            <p>Back up your tractor to the trolley hitch tongue at the farm yard until you are within 3 meters, then press <strong>[G]</strong> or tap the <strong>[HITCH]</strong> button. Reversing with an articulated trailer requires counter-steering!</p>
+
+            <h3>3. Farming Fields & Crop Cultivation</h3>
+            <p>Field #1 contains interactive soil. Attach the cultivator, drive into the field, and press <strong>[E]</strong> to lower the steel tines into the soil. Driving through the field tills the earth into rich dark furrows!</p>
+
+            <h3>4. Earning Money & Upgrading</h3>
+            <p>Deliver crops across the canal bridge to <strong>Kisan Mandi</strong> and complete missions to earn ₹ Rupees and XP. Visit the <strong>Garage</strong> to unlock new tractors and custom paint styles!</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // ABOUT SCREEN
+  // ==========================================
+
+  renderAbout() {
+    return `
+      <div class="modal-overlay">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h2>ABOUT INDIAN TRACTOR SIMULATOR 3D</h2>
+            <button class="close-modal" id="modal-close">✕</button>
+          </div>
+          <div class="modal-body text-content">
+            <p><strong>INDIAN TRACTOR SIMULATOR 3D</strong> is a dedicated open-world farming and driving simulation inspired by rural agricultural India.</p>
+            <ul>
+              <li>Pure WebGL 3D rendering with dynamic lighting, shadows, and weather.</li>
+              <li>Procedural Web Audio API diesel sound engine & Punjabi pressure horn.</li>
+              <li>Realistic articulated trailer towing and soil cultivation grid.</li>
+              <li>10 complete missions, 3 customizable tractors, and local save storage.</li>
+            </ul>
+            <p>© 2026 Indian Tractor Simulator 3D Team. Built for browser performance on desktop and mobile.</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // MINIMAP RADAR INITIALIZATION & DRAWING
+  // ==========================================
+
+  initMinimap() {
+    this.minimapCanvas = document.getElementById('minimap-canvas');
+    if (this.minimapCanvas) {
+      this.minimapCtx = this.minimapCanvas.getContext('2d');
+    }
+  }
+
+  updateMinimap(tractorX, tractorZ, tractorHeading, waypoints, activeTarget) {
+    if (!this.minimapCtx || !this.minimapCanvas) return;
+    const ctx = this.minimapCtx;
+    const w = this.minimapCanvas.width;
+    const h = this.minimapCanvas.height;
+    const cx = w * 0.5;
+    const cy = h * 0.5;
+    const scale = 0.55; // pixels per world meter
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Background circle radar
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, w * 0.48, 0, Math.PI * 2);
+    ctx.clip();
+
+    ctx.fillStyle = '#2e4922';
+    ctx.fillRect(0, 0, w, h);
+
+    // Grid lines
+    ctx.strokeStyle = '#3e5e30';
+    ctx.lineWidth = 1;
+    for (let i = -150; i <= 150; i += 30) {
+      ctx.beginPath();
+      ctx.moveTo(cx + (i - tractorX) * scale, 0);
+      ctx.lineTo(cx + (i - tractorX) * scale, h);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, cy + (i - tractorZ) * scale);
+      ctx.lineTo(w, cy + (i - tractorZ) * scale);
+      ctx.stroke();
+    }
+
+    // Roads
+    ctx.fillStyle = '#444444';
+    // North-south road (x ~ 0)
+    ctx.fillRect(cx + (0 - tractorX) * scale - 2, 0, 4, h);
+    // East-west road (z ~ -20)
+    ctx.fillRect(0, cy + (-20 - tractorZ) * scale - 2, w, 4);
+
+    // Canal
+    ctx.fillStyle = '#00838f';
+    ctx.fillRect(cx + (-80 - tractorX) * scale - 5, 0, 10, h);
+
+    // Fields
+    ctx.fillStyle = 'rgba(212, 160, 23, 0.4)'; // Wheat field #1
+    ctx.fillRect(cx + (-75 - 45 - tractorX) * scale, cy + (85 - 35 - tractorZ) * scale, 90 * scale, 70 * scale);
+
+    ctx.fillStyle = 'rgba(255, 235, 59, 0.4)'; // Mustard field #2
+    ctx.fillRect(cx + (85 - 40 - tractorX) * scale, cy + (95 - 30 - tractorZ) * scale, 80 * scale, 60 * scale);
+
+    // Waypoints
+    for (const key in waypoints) {
+      const wp = waypoints[key];
+      const wx = cx + (wp.x - tractorX) * scale;
+      const wz = cy + (wp.z - tractorZ) * scale;
+
+      ctx.fillStyle = '#' + wp.color.toString(16).padStart(6, '0');
+      ctx.beginPath();
+      ctx.arc(wx, wz, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Active Mission Beacon
+    if (activeTarget) {
+      const tx = cx + (activeTarget.x - tractorX) * scale;
+      const tz = cy + (activeTarget.z - tractorZ) * scale;
+
+      const pulse = (Math.sin(Date.now() * 0.008) + 1) * 3 + 6;
+      ctx.strokeStyle = '#ff9800';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(tx, tz, pulse, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ff5722';
+      ctx.beginPath();
+      ctx.arc(tx, tz, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Tractor Icon (Red arrow at center pointing in tractorHeading)
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-tractorHeading);
+
+    ctx.fillStyle = '#f44336';
+    ctx.beginPath();
+    ctx.moveTo(0, -9);
+    ctx.lineTo(6, 7);
+    ctx.lineTo(0, 4);
+    ctx.lineTo(-6, 7);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+    ctx.restore();
+
+    // Radar border ring
+    ctx.strokeStyle = '#81c784';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, w * 0.48, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // ==========================================
+  // MOBILE TOUCH CONTROLS BINDINGS
+  // ==========================================
+
+  initTouchControls() {
+    const inputs = this.game.inputs;
+
+    const bindTouch = (elemId, onDown, onUp) => {
+      const el = document.getElementById(elemId);
+      if (!el) return;
+
+      const handleDown = (e) => {
+        e.preventDefault();
+        onDown();
+      };
+      const handleUp = (e) => {
+        e.preventDefault();
+        onUp();
+      };
+
+      el.addEventListener('pointerdown', handleDown);
+      el.addEventListener('pointerup', handleUp);
+      el.addEventListener('pointercancel', handleUp);
+      el.addEventListener('pointerleave', handleUp);
+    };
+
+    bindTouch('touch-steer-left', () => { inputs.steerLeft = true; }, () => { inputs.steerLeft = false; });
+    bindTouch('touch-steer-right', () => { inputs.steerRight = true; }, () => { inputs.steerRight = false; });
+    bindTouch('touch-gas', () => { inputs.accelerate = true; }, () => { inputs.accelerate = false; });
+    bindTouch('touch-brake', () => { inputs.brake = true; }, () => { inputs.brake = false; });
+
+    // Single-click action buttons
+    const bindClick = (elemId, callback) => {
+      const el = document.getElementById(elemId);
+      if (el) el.addEventListener('click', (e) => { e.preventDefault(); callback(); });
+    };
+
+    bindClick('touch-horn', () => {
+      if (this.game.audio) {
+        this.game.audio.startHorn();
+        setTimeout(() => this.game.audio.stopHorn(), 500);
+      }
+    });
+
+    bindClick('touch-lights', () => this.game.toggleHeadlights());
+    bindClick('touch-hitch', () => this.game.toggleHitch());
+    bindClick('touch-implement', () => this.game.toggleImplement());
+    bindClick('touch-reset', () => this.game.resetTractor());
+  }
+
+  showToast(message) {
+    const toast = document.getElementById('toast-notify');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('visible');
+    setTimeout(() => {
+      toast.classList.remove('visible');
+    }, 2800);
+  }
+
+  // ==========================================
+  // DOM EVENT DELEGATION
+  // ==========================================
+
+  bindEvents() {
+    // Menu Buttons
+    const on = (id, fn) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', fn);
+    };
+
+    on('btn-play', () => this.game.startGame('normal'));
+    on('btn-quick-drive', () => this.game.startGame('quick'));
+    on('btn-garage', () => this.showScreen('garage'));
+    on('btn-missions', () => this.showScreen('missions'));
+    on('btn-map', () => this.showScreen('map'));
+    on('btn-settings', () => this.showScreen('settings'));
+    on('btn-controls', () => this.showScreen('controls'));
+    on('btn-how-to-play', () => this.showScreen('how_to_play'));
+    on('btn-about', () => this.showScreen('about'));
+
+    on('btn-new-game', () => {
+      if (confirm('Start New Game? This will reset all mission progress and currency.')) {
+        this.game.save.resetProgress();
+        this.render();
+      }
+    });
+
+    // Close Modals
+    on('modal-close', () => this.showScreen(this.game.isRunning ? 'game' : 'menu'));
+    on('garage-back', () => this.showScreen('menu'));
+    on('garage-drive-btn', () => this.game.startGame('normal'));
+
+    // In-Game HUD Controls
+    on('hud-btn-weather', () => this.game.cycleWeather());
+    on('hud-btn-time', () => this.game.cycleTimeOfDay());
+    on('hud-btn-cam', () => this.game.cycleCamera());
+    on('hud-btn-map', () => this.showScreen('map'));
+    on('hud-btn-pause', () => this.game.togglePause());
+
+    // Garage Swatches
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tId = e.currentTarget.dataset.tractor;
+        this.game.selectTractorInGarage(tId);
+      });
+    });
+
+    document.querySelectorAll('.color-swatch').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const col = parseInt(e.currentTarget.dataset.color);
+        this.game.setTractorPaint(col);
+      });
+    });
+
+    document.querySelectorAll('.rim-swatch').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const rim = parseInt(e.currentTarget.dataset.rim);
+        this.game.setTractorRim(rim);
+      });
+    });
+
+    // Mission Start Buttons
+    document.querySelectorAll('.btn-start-mission').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = parseInt(e.currentTarget.dataset.id);
+        this.game.startMission(id);
+      });
+    });
+
+    // Audio Sliders
+    const bindSlider = (id, channel) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          this.game.setVolume(channel, val);
+        });
+      }
+    };
+    bindSlider('vol-master', 'master');
+    bindSlider('vol-engine', 'engine');
+    bindSlider('vol-ambient', 'ambient');
+    bindSlider('vol-effects', 'effects');
+
+    const chkMute = document.getElementById('chk-mute');
+    if (chkMute) {
+      chkMute.addEventListener('change', (e) => {
+        this.game.setMute(e.target.checked);
+      });
+    }
+  }
+
+  setupGlobalEvents() {
+    window.addEventListener('keydown', (e) => {
+      if (this.currentScreen === 'game') {
+        if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+          this.game.togglePause();
+        }
+        if (e.key === 'm' || e.key === 'M') {
+          this.showScreen('map');
+        }
+      } else if (e.key === 'Escape') {
+        this.showScreen(this.game.isRunning ? 'game' : 'menu');
+      }
+    });
+  }
+}
+
+
+  // ==========================================
+  // MODULE: game.js
+  // ==========================================
+/**
+ * Indian Tractor Simulator 3D - Master Game Controller
+ * Orchestrates 3D rendering, physics simulation, audio synthesis,
+ * input handling, mission progression, and UI state.
+ */
+
+
+
+
+
+
+
+
+
+
+
+class Game {
+  constructor() {
+    this.THREE = window.THREE;
+
+    this.container = document.getElementById('canvas-container');
+    this.renderer = null;
+    this.scene = null;
+    this.camera = null;
+
+    // Subsystems
+    this.audio = new AudioManager();
+    this.physics = new VehiclePhysics();
+    this.save = new SaveSystem();
+    this.modelFactory = null;
+    this.world = null;
+    this.weather = null;
+    this.cameraController = null;
+    this.missions = null;
+    this.ui = new UIManager(this);
+
+    // Active 3D Vehicle Objects
+    this.tractorObj = null;
+    this.trolleyObj = null;
+    this.implementObj = null;
+
+    // Visual Particle Systems (Exhaust smoke & Soil dust)
+    this.exhaustParticles = [];
+
+    // Game Runtime State
+    this.isRunning = false;
+    this.isPaused = false;
+    this.lastTime = performance.now();
+    this.headlightsOn = false;
+    this.fuelLevel = 100; // Functional fuel system
+
+    // Input State
+    this.inputs = {
+      accelerate: false,
+      brake: false,
+      steerLeft: false,
+      steerRight: false,
+      handbrake: false,
+      steeringSlider: 0
+    };
+
+    // Day-Night and Weather cycles
+    this.weathers = ['sunny', 'cloudy', 'rainy', 'foggy'];
+    this.timesOfDay = ['morning', 'afternoon', 'evening', 'night'];
+    this.weatherIndex = 0;
+    this.timeIndex = 0;
+  }
+
+  init() {
+    if (!window.THREE) {
+      console.error('Three.js is not loaded!');
+      return;
+    }
+    this.THREE = window.THREE;
+
+    // 1. Scene & Renderer
+    this.scene = new this.THREE.Scene();
+
+    this.renderer = new this.THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: 'high-performance'
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = this.THREE.PCFSoftShadowMap;
+
+    this.container.appendChild(this.renderer.domElement);
+
+    // 2. Camera
+    this.camera = new this.THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.3, 800);
+    this.cameraController = new CameraController(this.camera, this.THREE);
+
+    // 3. Subsystems
+    this.modelFactory = new ModelFactory(this.THREE);
+    this.world = new WorldManager(this.THREE);
+    this.world.build();
+    this.scene.add(this.world.root);
+
+    this.weather = new WeatherSystem(this.scene, this.THREE);
+    this.missions = new MissionSystem(this.world, this.audio);
+
+    // Load saved preferences
+    this.applySavedPreferences();
+
+    // 4. Build Tractor and Trolley
+    this.spawnTractor(this.save.data.selectedTractor);
+    this.spawnTrolley();
+    this.spawnImplement('cultivator');
+
+    // 5. Initialize Exhaust Smoke Particles
+    this.initExhaustParticles();
+
+    // 6. Setup Event Listeners
+    this.setupInputs();
+    window.addEventListener('resize', () => this.handleResize());
+
+    // 7. Initialize UI
+    this.ui.init();
+
+    // Start Master Render & Physics Loop
+    requestAnimationFrame((t) => this.loop(t));
+  }
+
+  applySavedPreferences() {
+    const sound = this.save.data.soundSettings;
+    this.audio.setVolume('master', sound.master);
+    this.audio.setVolume('engine', sound.engine);
+    this.audio.setVolume('ambient', sound.ambient);
+    this.audio.setVolume('effects', sound.effects);
+    this.audio.setMute(sound.muted);
+  }
+
+  // ==========================================
+  // VEHICLE SPAWNING
+  // ==========================================
+
+  spawnTractor(type = 'sher855') {
+    if (this.tractorObj) {
+      this.scene.remove(this.tractorObj.root);
+    }
+
+    const customColor = this.save.data.customizations.bodyColor;
+    const customRim = this.save.data.customizations.rimColor;
+
+    this.tractorObj = this.modelFactory.createTractor(type, customColor, customRim);
+    this.scene.add(this.tractorObj.root);
+
+    // Initial position at farm yard shed
+    this.physics.reset(-20, -25, Math.PI);
+  }
+
+  spawnTrolley() {
+    if (this.trolleyObj) {
+      this.scene.remove(this.trolleyObj.root);
+    }
+
+    this.trolleyObj = this.modelFactory.createTrolley();
+    this.scene.add(this.trolleyObj.root);
+
+    // Load cargo sacks
+    const cargo = this.modelFactory.createCargoLoad('wheat', 10);
+    this.trolleyObj.cargoGroup.add(cargo);
+
+    // Park trolley near farm yard
+    this.physics.trolleyX = -20;
+    this.physics.trolleyY = 0.85;
+    this.physics.trolleyZ = -29;
+    this.physics.trolleyHeading = Math.PI;
+    this.physics.trolleyAttached = false;
+  }
+
+  spawnImplement(type = 'cultivator') {
+    if (this.implementObj) {
+      this.scene.remove(this.implementObj.root);
+    }
+
+    this.implementObj = this.modelFactory.createImplement(type);
+    this.tractorObj.root.add(this.implementObj.root);
+    this.implementObj.root.position.set(0, 0.1, -1.6);
+    this.physics.implementAttached = type;
+  }
+
+  initExhaustParticles() {
+    const THREE = this.THREE;
+    const count = 35;
+    const geo = new THREE.SphereGeometry(0.08, 6, 6);
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0x333333,
+      transparent: true,
+      opacity: 0.6
+    });
+
+    for (let i = 0; i < count; i++) {
+      const mesh = new THREE.Mesh(geo, mat.clone());
+      mesh.visible = false;
+      this.scene.add(mesh);
+      this.exhaustParticles.push({
+        mesh,
+        life: 0,
+        maxLife: 0.6 + Math.random() * 0.4,
+        vx: 0,
+        vy: 0,
+        vz: 0
+      });
+    }
+  }
+
+  emitExhaustSmoke(x, y, z, rpm) {
+    const p = this.exhaustParticles.find(item => !item.mesh.visible);
+    if (!p) return;
+
+    p.mesh.position.set(x, y, z);
+    p.mesh.scale.set(1, 1, 1);
+    p.mesh.visible = true;
+    p.life = 0;
+    p.maxLife = 0.5 + Math.random() * 0.4;
+
+    const upwardSpeed = 1.8 + (rpm / 2400) * 3.5;
+    p.vy = upwardSpeed;
+    p.vx = (Math.random() - 0.5) * 0.4;
+    p.vz = (Math.random() - 0.5) * 0.4;
+  }
+
+  updateExhaustParticles(dt) {
+    for (const p of this.exhaustParticles) {
+      if (!p.mesh.visible) continue;
+      p.life += dt;
+      if (p.life >= p.maxLife) {
+        p.mesh.visible = false;
+        continue;
+      }
+
+      p.mesh.position.y += p.vy * dt;
+      p.mesh.position.x += p.vx * dt;
+      p.mesh.position.z += p.vz * dt;
+
+      const progress = p.life / p.maxLife;
+      const s = 1.0 + progress * 4.5;
+      p.mesh.scale.set(s, s, s);
+      p.mesh.material.opacity = (1 - progress) * 0.5;
+    }
+  }
+
+  // ==========================================
+  // INPUT PROCESSING
+  // ==========================================
+
+  setupInputs() {
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+      switch (e.code) {
+        case 'KeyW':
+        case 'ArrowUp':
+          this.inputs.accelerate = true;
+          break;
+        case 'KeyS':
+        case 'ArrowDown':
+          this.inputs.brake = true;
+          break;
+        case 'KeyA':
+        case 'ArrowLeft':
+          this.inputs.steerLeft = true;
+          break;
+        case 'KeyD':
+        case 'ArrowRight':
+          this.inputs.steerRight = true;
+          break;
+        case 'Space':
+          this.inputs.handbrake = true;
+          break;
+        case 'KeyH':
+          if (!e.repeat) this.audio.startHorn('punjabi');
+          break;
+        case 'KeyL':
+          if (!e.repeat) this.toggleHeadlights();
+          break;
+        case 'KeyC':
+          if (!e.repeat) this.cycleCamera();
+          break;
+        case 'KeyE':
+          if (!e.repeat) this.toggleImplement();
+          break;
+        case 'KeyG':
+          if (!e.repeat) this.toggleHitch();
+          break;
+        case 'KeyR':
+          if (!e.repeat) this.resetTractor();
+          break;
+        case 'KeyF':
+          if (!e.repeat) this.toggleEngine();
+          break;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      switch (e.code) {
+        case 'KeyW':
+        case 'ArrowUp':
+          this.inputs.accelerate = false;
+          break;
+        case 'KeyS':
+        case 'ArrowDown':
+          this.inputs.brake = false;
+          break;
+        case 'KeyA':
+        case 'ArrowLeft':
+          this.inputs.steerLeft = false;
+          break;
+        case 'KeyD':
+        case 'ArrowRight':
+          this.inputs.steerRight = false;
+          break;
+        case 'Space':
+          this.inputs.handbrake = false;
+          break;
+        case 'KeyH':
+          this.audio.stopHorn();
+          break;
+      }
+    });
+
+    // Orbit camera mouse drag controls
+    window.addEventListener('mousedown', (e) => {
+      if (this.cameraController.mode === 'orbit' || !this.isRunning) {
+        this.cameraController.handlePointerDown(e.clientX, e.clientY);
+      }
+    });
+    window.addEventListener('mousemove', (e) => {
+      this.cameraController.handlePointerMove(e.clientX, e.clientY);
+    });
+    window.addEventListener('mouseup', () => {
+      this.cameraController.handlePointerUp();
+    });
+    window.addEventListener('wheel', (e) => {
+      this.cameraController.handleZoom(e.deltaY);
+    }, { passive: true });
+  }
+
+  // ==========================================
+  // GAMEPLAY ACTIONS
+  // ==========================================
+
+  startGame(mode = 'normal') {
+    this.isRunning = true;
+    this.isPaused = false;
+    this.ui.showScreen('game');
+
+    // Initialize audio context on player gesture
+    this.audio.init();
+    this.audio.startEngine();
+
+    if (mode === 'quick') {
+      this.ui.showToast('🚀 Quick Drive: Open World Free Roam!');
+    } else {
+      this.ui.showToast('🌾 Indian Tractor Simulator: Welcome to the Pind!');
+    }
+  }
+
+  togglePause() {
+    if (!this.isRunning) return;
+    this.isPaused = !this.isPaused;
+    if (this.isPaused) {
+      this.ui.showToast('⏸️ Game Paused');
+    } else {
+      this.ui.showToast('▶️ Resumed');
+    }
+  }
+
+  toggleEngine() {
+    this.physics.engineOn = !this.physics.engineOn;
+    if (this.physics.engineOn) {
+      this.audio.startEngine();
+      this.ui.showToast('⚡ Tractor Diesel Engine Started');
+    } else {
+      this.audio.stopEngine();
+      this.ui.showToast('🛑 Engine Switched Off');
+    }
+  }
+
+  toggleHeadlights() {
+    this.headlightsOn = !this.headlightsOn;
+    const intensity = this.headlightsOn ? 2.5 : 0;
+    this.tractorObj.headlights.leftSpot.intensity = intensity;
+    this.tractorObj.headlights.rightSpot.intensity = intensity;
+    this.tractorObj.headlights.leftLens.material = this.headlightsOn ? this.modelFactory.materials.headlightOn : this.modelFactory.materials.headlightGlass;
+    this.tractorObj.headlights.rightLens.material = this.tractorObj.headlights.leftLens.material;
+
+    this.audio.playUIClick();
+    this.ui.showToast(this.headlightsOn ? '💡 Headlights ON' : '💡 Headlights OFF');
+  }
+
+  toggleHitch() {
+    if (this.physics.trolleyAttached) {
+      // Detach trolley
+      this.physics.detachTrolley();
+      this.audio.playHitchSound(false);
+      this.ui.showToast('🔗 Trolley Detached');
+    } else {
+      // Check distance to trolley
+      const hitchX = this.physics.x - Math.sin(this.physics.heading) * this.physics.hitchOffset;
+      const hitchZ = this.physics.z - Math.cos(this.physics.heading) * this.physics.hitchOffset;
+      const dist = Math.hypot(hitchX - this.physics.trolleyX, hitchZ - this.physics.trolleyZ);
+
+      if (dist < 4.5) {
+        this.physics.attachTrolley();
+        this.audio.playHitchSound(true);
+        this.ui.showToast('🔗 Trolley Attached Successfully!');
+      } else {
+        this.ui.showToast(`⚠️ Too far to hitch! Reverse closer (${Math.round(dist)}m)`);
+      }
+    }
+  }
+
+  toggleImplement() {
+    const lowered = this.physics.toggleEquipmentLower();
+    this.audio.playUIClick();
+    if (lowered) {
+      this.ui.showToast('🌾 Farming Tool LOWERED (Working Soil)');
+    } else {
+      this.ui.showToast('🌾 Farming Tool RAISED (Transport Mode)');
+    }
+  }
+
+  resetTractor() {
+    // Upright tractor on road or nearest safe coordinate
+    this.physics.reset(this.physics.x, this.physics.z, this.physics.heading);
+    this.audio.playHitchSound(true);
+    this.ui.showToast('🔄 Tractor Reset Upright');
+  }
+
+  cycleCamera() {
+    const mode = this.cameraController.cycleMode();
+    const names = {
+      chase: 'Third-Person Chase',
+      close_rear: 'Close Rear Hitch',
+      cab_driver: 'Cockpit Driver View',
+      bumper: 'Front Bumper',
+      orbit: 'Free Orbit Inspection'
+    };
+    const label = names[mode] || mode;
+    const el = document.getElementById('hud-cam-val');
+    if (el) el.textContent = label.split(' ')[0];
+    this.ui.showToast(`📷 Camera: ${label}`);
+  }
+
+  cycleWeather() {
+    this.weatherIndex = (this.weatherIndex + 1) % this.weathers.length;
+    const w = this.weathers[this.weatherIndex];
+    this.weather.setWeather(w, this.audio);
+    const el = document.getElementById('hud-weather-val');
+    if (el) el.textContent = w.toUpperCase();
+    this.ui.showToast(`🌤️ Weather: ${w.toUpperCase()}`);
+  }
+
+  cycleTimeOfDay() {
+    this.timeIndex = (this.timeIndex + 1) % this.timesOfDay.length;
+    const t = this.timesOfDay[this.timeIndex];
+    this.weather.setTimeOfDay(t);
+    const el = document.getElementById('hud-time-val');
+    if (el) el.textContent = t.toUpperCase();
+    this.world.setStreetlightsActive(t === 'night');
+    this.ui.showToast(`☀️ Time: ${t.toUpperCase()}`);
+  }
+
+  startMission(id) {
+    const mission = this.missions.startMission(id, this.physics, this.weather);
+    if (mission) {
+      this.startGame('normal');
+      this.ui.showToast(`🎯 Started: ${mission.title}`);
+    }
+  }
+
+  selectTractorInGarage(tractorId) {
+    if (this.save.data.unlockedTractors.includes(tractorId)) {
+      this.save.selectTractor(tractorId);
+      this.spawnTractor(tractorId);
+      this.ui.render();
+      this.ui.showToast(`🚜 Equipped ${this.tractorObj.config.name}`);
+    } else {
+      const tractors = [
+        { id: 'samrat575', cost: 6000 },
+        { id: 'raftaar5050', cost: 12000 }
+      ];
+      const t = tractors.find(x => x.id === tractorId);
+      if (t && this.save.unlockTractor(t.id, t.cost)) {
+        this.save.selectTractor(t.id);
+        this.spawnTractor(t.id);
+        this.audio.playMissionSuccess();
+        this.ui.render();
+        this.ui.showToast(`🎉 Purchased & Equipped ${this.tractorObj.config.name}!`);
+      } else {
+        this.ui.showToast(`⚠️ Not enough money! Requires ₹${t ? t.cost.toLocaleString('en-IN') : 0}`);
+      }
+    }
+  }
+
+  setTractorPaint(color) {
+    this.save.setCustomization('bodyColor', color);
+    this.spawnTractor(this.save.data.selectedTractor);
+    this.ui.showToast('🎨 Custom Paint Applied');
+  }
+
+  setTractorRim(rimColor) {
+    this.save.setCustomization('rimColor', rimColor);
+    this.spawnTractor(this.save.data.selectedTractor);
+    this.ui.showToast('🚜 Custom Rims Applied');
+  }
+
+  setVolume(channel, val) {
+    this.audio.setVolume(channel, val);
+    this.save.data.soundSettings[channel] = val;
+    this.save.save();
+  }
+
+  setMute(mute) {
+    this.audio.setMute(mute);
+    this.save.data.soundSettings.muted = mute;
+    this.save.save();
+  }
+
+  handleResize() {
+    if (!this.camera || !this.renderer) return;
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  // ==========================================
+  // MASTER TICK & RENDER LOOP
+  // ==========================================
+
+  loop(currentTime) {
+    requestAnimationFrame((t) => this.loop(t));
+
+    const dt = Math.min(0.05, (currentTime - this.lastTime) * 0.001);
+    this.lastTime = currentTime;
+
+    // 1. Simulation step
+    if (this.isRunning && !this.isPaused) {
+      // Physics step
+      this.physics.update(
+        dt,
+        this.inputs,
+        (x, z) => this.world.getTerrainHeight(x, z),
+        (x, z) => this.world.getSurfaceType(x, z)
+      );
+
+      // Interactive Farming: If cultivator is lowered in Field #1, till soil
+      if (this.physics.implementAttached && this.physics.implementLowered) {
+        const hitchX = this.physics.x - Math.sin(this.physics.heading) * 1.6;
+        const hitchZ = this.physics.z - Math.cos(this.physics.heading) * 1.6;
+        this.world.updateSoilCultivation(hitchX, hitchZ, 2.5, this.physics.implementAttached === 'cultivator');
+      }
+
+      // Fuel consumption simulation
+      if (this.physics.engineOn && Math.abs(this.physics.speed) > 0.5) {
+        this.fuelLevel = Math.max(0, this.fuelLevel - dt * 0.015);
+      }
+
+      // Audio engine update
+      this.audio.updateEngine(this.physics.rpm, this.inputs.accelerate ? 1 : 0);
+
+      // Mission progress check
+      this.missions.update(
+        dt,
+        this.physics,
+        (completed) => {
+          this.save.addReward(completed.reward, completed.xp);
+          this.save.markMissionCompleted(completed.id);
+          this.ui.render();
+          this.ui.showToast(`🏆 MISSION COMPLETE: ${completed.title}! +₹${completed.reward.toLocaleString('en-IN')}`);
+        },
+        (failed) => {
+          this.ui.showToast(`❌ TIME OUT: ${failed.title} Failed!`);
+        }
+      );
+
+      // Ambient birds random chirp
+      if (Math.random() < 0.0015 && this.weather.currentTimeOfDay === 'morning') {
+        this.audio.playVillageBirdChirp();
+      }
+    }
+
+    // 2. Synchronize 3D Vehicle Models with Physics
+    this.syncTractorVisuals(dt);
+    this.syncTrolleyVisuals(dt);
+
+    // 3. Update Weather & Particles
+    this.weather.update(dt, this.physics.x, this.physics.z);
+    this.updateExhaustParticles(dt);
+
+    // 4. Update Camera
+    if (this.isRunning) {
+      this.cameraController.update(
+        dt,
+        this.physics.x,
+        this.physics.y,
+        this.physics.z,
+        this.physics.heading,
+        this.physics.pitch,
+        this.physics.speed,
+        this.physics.rpm
+      );
+    } else {
+      // Menu / Garage Turntable orbit showcase
+      const angle = currentTime * 0.00045;
+      const camDist = 6.8;
+      this.camera.position.set(
+        this.physics.x + Math.sin(angle) * camDist,
+        this.physics.y + 2.2,
+        this.physics.z + Math.cos(angle) * camDist
+      );
+      this.camera.lookAt(this.physics.x, this.physics.y + 1.1, this.physics.z);
+    }
+
+    // 5. Update HUD Displays
+    if (this.isRunning && this.ui.currentScreen === 'game') {
+      this.updateHUDValues();
+    }
+
+    // 6. Render 3D Scene
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  syncTractorVisuals(dt) {
+    if (!this.tractorObj) return;
+
+    // Position and orientation
+    this.tractorObj.root.position.set(this.physics.x, this.physics.y, this.physics.z);
+    this.tractorObj.root.rotation.set(this.physics.pitch, this.physics.heading, 0, 'YXZ');
+
+    // Front steering wheel angle
+    this.tractorObj.frontLeftWheel.steer.rotation.y = this.physics.steerAngle;
+    this.tractorObj.frontRightWheel.steer.rotation.y = this.physics.steerAngle;
+
+    // Rolling wheel spin
+    this.tractorObj.frontLeftWheel.spin.rotation.x = this.physics.frontWheelRotation;
+    this.tractorObj.frontRightWheel.spin.rotation.x = this.physics.frontWheelRotation;
+    this.tractorObj.rearLeftWheel.spin.rotation.x = this.physics.rearWheelRotation;
+    this.tractorObj.rearRightWheel.spin.rotation.x = this.physics.rearWheelRotation;
+
+    // Cockpit steering wheel turn
+    this.tractorObj.steeringWheel.rotation.z = -this.physics.steeringWheelRotation;
+
+    // Exhaust flapper flutter
+    if (this.physics.engineOn) {
+      this.tractorObj.flapper.rotation.z = 0.25 + Math.sin(Date.now() * 0.05) * 0.15;
+
+      // Exhaust smoke emission
+      if (Math.random() < 0.35) {
+        const exhX = this.physics.x + Math.sin(this.physics.heading) * 0.85 + Math.cos(this.physics.heading) * 0.38;
+        const exhZ = this.physics.z + Math.cos(this.physics.heading) * 0.85 - Math.sin(this.physics.heading) * 0.38;
+        const exhY = this.physics.y + 1.9;
+        this.emitExhaustSmoke(exhX, exhY, exhZ, this.physics.rpm);
+      }
+    }
+
+    // Brake lights active
+    const isBraking = this.inputs.brake || this.inputs.handbrake;
+    const tailMat = isBraking ? this.modelFactory.materials.taillightOn : this.modelFactory.materials.taillightOff;
+    this.tractorObj.taillights.left.material = tailMat;
+    this.tractorObj.taillights.right.material = tailMat;
+
+    // Implement lowering animation
+    if (this.implementObj) {
+      const lowerY = -this.physics.implementProgress * 0.45;
+      this.implementObj.root.position.y = 0.1 + lowerY;
+    }
+  }
+
+  syncTrolleyVisuals(dt) {
+    if (!this.trolleyObj) return;
+
+    this.trolleyObj.root.position.set(this.physics.trolleyX, this.physics.trolleyY, this.physics.trolleyZ);
+    this.trolleyObj.root.rotation.set(0, this.physics.trolleyHeading, 0);
+
+    // Trolley wheel spin
+    this.trolleyObj.leftWheel.spin.rotation.x = this.physics.trolleyWheelRotation;
+    this.trolleyObj.rightWheel.spin.rotation.x = this.physics.trolleyWheelRotation;
+  }
+
+  updateHUDValues() {
+    // Speed (km/h)
+    const kmh = Math.round(Math.abs(this.physics.speed) * 3.6);
+    const elSpeed = document.getElementById('dash-speed');
+    if (elSpeed) elSpeed.textContent = kmh;
+
+    // RPM
+    const rpm = Math.round(this.physics.rpm);
+    const elRpm = document.getElementById('dash-rpm');
+    if (elRpm) elRpm.textContent = rpm;
+    const rpmFill = document.getElementById('rpm-bar');
+    if (rpmFill) rpmFill.style.width = `${Math.min(100, (rpm / 2400) * 100)}%`;
+
+    // Gear
+    const elGear = document.getElementById('dash-gear');
+    if (elGear) {
+      if (this.physics.currentGear === -1) elGear.textContent = 'R';
+      else if (this.physics.currentGear === 0) elGear.textContent = 'N';
+      else elGear.textContent = `D${this.physics.currentGear}`;
+    }
+
+    // Indicators
+    const indEngine = document.getElementById('ind-engine');
+    if (indEngine) indEngine.style.opacity = this.physics.engineOn ? '1.0' : '0.2';
+
+    const indLight = document.getElementById('ind-light');
+    if (indLight) indLight.style.opacity = this.headlightsOn ? '1.0' : '0.2';
+
+    const indBrake = document.getElementById('ind-brake');
+    if (indBrake) indBrake.style.opacity = (this.inputs.brake || this.inputs.handbrake) ? '1.0' : '0.2';
+
+    // Mission HUD details
+    const mission = this.missions.activeMission;
+    const missionCard = document.getElementById('mission-card');
+    if (mission && missionCard) {
+      missionCard.classList.remove('hidden');
+      const dist = Math.round(Math.hypot(this.physics.x - mission.target.x, this.physics.z - mission.target.z));
+      const distEl = document.getElementById('mission-dist-text');
+      if (distEl) distEl.textContent = `Target: ${mission.target.name} (${dist}m)`;
+
+      const progEl = document.getElementById('mission-progress-fill');
+      if (progEl) {
+        const pct = mission.progress(this.physics, this.world);
+        progEl.style.width = `${Math.min(100, Math.round(pct))}%`;
+      }
+
+      const timerEl = document.getElementById('mission-timer-text');
+      if (timerEl && this.missions.isTimerActive) {
+        timerEl.textContent = `⏱️ ${Math.ceil(this.missions.timer)}s`;
+      }
+    } else if (missionCard) {
+      missionCard.classList.add('hidden');
+    }
+
+    // Implement Card details
+    const implName = document.getElementById('impl-name');
+    const implState = document.getElementById('impl-state');
+    if (implName && implState) {
+      if (this.physics.trolleyAttached) {
+        implName.textContent = 'Tractor Trolley Attached';
+        implState.textContent = `Cargo: ${this.physics.trolleyCargoCount} Bags [G: Detach]`;
+      } else if (this.physics.implementAttached) {
+        const tool = this.physics.implementAttached === 'cultivator' ? 'Spring Cultivator' : 'Farming Tool';
+        implName.textContent = tool;
+        implState.textContent = this.physics.implementLowered ? 'Lowered (Working) [E]' : 'Raised (Transport) [E]';
+      } else {
+        implName.textContent = 'Tractor Solo';
+        implState.textContent = 'Ready for hitching [G]';
+      }
+    }
+
+    // Minimap Radar update
+    this.ui.updateMinimap(
+      this.physics.x,
+      this.physics.z,
+      this.physics.heading,
+      this.world.waypoints,
+      mission ? mission.target : null
+    );
+  }
+}
+
+// Global bootstrap
+function bootGame() {
+  if (!window.THREE) {
+    const ui = document.getElementById('ui-root');
+    if (ui) {
+      ui.innerHTML = `
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; max-width: 520px; padding: 30px; background: rgba(18,22,30,0.95); border: 2px solid #ffb300; border-radius: 12px; font-family: 'Rajdhani', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+          <h2 style="color: #ffb300; font-size: 2.2rem; font-family: 'Teko', sans-serif; letter-spacing: 1px;">🚜 INDIAN TRACTOR SIMULATOR 3D</h2>
+          <p style="margin: 16px 0; color: #cfd8dc; font-size: 1.05rem; line-height: 1.5;">The 3D WebGL engine is connecting. Please check your internet connection for the initial 3D shader library download or refresh the page.</p>
+          <button onclick="location.reload()" style="background: linear-gradient(135deg, #ffb300, #ff6f00); color: #111; border: none; padding: 12px 28px; font-weight: 700; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-family: 'Rajdhani', sans-serif;">RELOAD GAME</button>
+        </div>
+      `;
+    }
+    return;
+  }
+  const game = new Game();
+  window.game = game;
+  game.init();
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', bootGame);
+} else {
+  bootGame();
+}
+
+
+})();
+
+  </script>
+</body>
+</html>
