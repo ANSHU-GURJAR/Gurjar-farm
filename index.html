@@ -292,12 +292,14 @@ body, html {
   position: absolute;
   top: 75px;
   right: 16px;
-  width: 160px;
-  height: 160px;
+  width: 170px;
+  height: 170px;
   border-radius: 50%;
   overflow: hidden;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
+  border: 2px solid #ffd54f;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.85);
   pointer-events: auto;
+  background: #111;
 }
 .minimap-label {
   position: absolute;
@@ -1528,10 +1530,10 @@ class VehiclePhysics {
     this.wheelSpeed = 0;
 
     // Steering
-    this.steerAngle = 0; // radians (-0.6 to +0.6)
+    this.steerAngle = 0; // radians (-0.75 to +0.75)
     this.targetSteerAngle = 0;
-    this.maxSteerAngle = 0.58; // ~33 degrees
-    this.steerSpeed = 2.8;
+    this.maxSteerAngle = 0.72; // ~41 degrees sharp Indian tractor lock
+    this.steerSpeed = 4.8; // Snappy steering reaction
 
     // Engine & Transmission
     this.engineOn = true;
@@ -1756,12 +1758,21 @@ class VehiclePhysics {
     }
 
     // 7. Steering & Bicycle Model Heading Update
-    if (Math.abs(this.speed) > 0.01) {
-      // Turning radius R = wheelbase / tan(steerAngle)
-      // Angular velocity omega = (speed / wheelbase) * tan(steerAngle)
-      const angularVel = (this.speed / this.wheelbase) * Math.tan(this.steerAngle);
-      this.heading += angularVel * dt;
+    // Responsive turning even at low tractor speeds (Indian tractors have tight turning radii)
+    if (Math.abs(this.steerAngle) > 0.01) {
+      const minTurnSpeed = (this.throttle > 0 || this.brake > 0) ? 2.8 : 1.4;
+      const effectiveSpeed = Math.max(minTurnSpeed, Math.abs(this.speed));
+      const direction = (this.currentGear === -1) ? -1 : 1;
 
+      // Turning angular velocity: steerAngle > 0 (Left) turns heading negative
+      const angularVel = -(direction * effectiveSpeed / this.wheelbase) * Math.tan(this.steerAngle) * 1.6;
+      
+      if (Math.abs(this.speed) > 0.02 || this.throttle > 0 || (this.brake > 0 && this.currentGear === -1)) {
+        this.heading += angularVel * dt;
+      }
+    }
+
+    if (Math.abs(this.speed) > 0.001) {
       // Integrate world position
       this.x += Math.sin(this.heading) * this.speed * dt;
       this.z += Math.cos(this.heading) * this.speed * dt;
@@ -1972,23 +1983,23 @@ class ModelFactory {
 
     const cfg = configs[type] || configs.sher855;
 
-    // Body paint material
+    // Body paint material (Realistic metallic clearcoat)
     const bodyMat = new THREE.MeshStandardMaterial({
       color: cfg.bodyColor,
-      roughness: 0.35,
-      metalness: 0.5
+      roughness: 0.24,
+      metalness: 0.65
     });
 
     const fenderMat = new THREE.MeshStandardMaterial({
       color: cfg.fenderColor,
-      roughness: 0.35,
-      metalness: 0.5
+      roughness: 0.25,
+      metalness: 0.62
     });
 
     const rimMat = new THREE.MeshStandardMaterial({
       color: cfg.rimColor,
-      roughness: 0.35,
-      metalness: 0.6
+      roughness: 0.28,
+      metalness: 0.75
     });
 
     // 1. Chassis & Cast Iron Transmission Block
@@ -2222,13 +2233,29 @@ class ModelFactory {
     rightHandle.position.x = 0.95;
     rightFenderGroup.add(rightFender, rightHandle);
 
+    // Chrome side mirrors on mudguards
+    const mirrorStemGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.45, 6);
+    const leftStem = new THREE.Mesh(mirrorStemGeo, this.materials.chrome);
+    leftStem.position.set(-1.05, 1.35, -0.4);
+    leftStem.rotation.z = -0.3;
+    const mirrorGlass = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.26, 0.03), this.materials.chrome);
+    mirrorGlass.position.set(-1.18, 1.55, -0.4);
+    leftFenderGroup.add(leftStem, mirrorGlass);
+
+    const rightStem = leftStem.clone();
+    rightStem.position.x = 1.05;
+    rightStem.rotation.z = 0.3;
+    const rightMirror = mirrorGlass.clone();
+    rightMirror.position.x = 1.18;
+    rightFenderGroup.add(rightStem, rightMirror);
+
     root.add(leftFenderGroup, rightFenderGroup);
 
     // 9. Traditional Indian Canopy (Chhatri)
     if (cfg.canopy) {
       const canopyGroup = new THREE.Group();
       // 4 Upright chrome support poles
-      const poleGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.5, 8);
+      const poleGeo = new THREE.CylinderGeometry(0.025, 0.025, 1.45, 8);
       const flPole = new THREE.Mesh(poleGeo, this.materials.chrome);
       flPole.position.set(-0.55, 1.25, -0.15);
       const frPole = flPole.clone();
@@ -2239,22 +2266,23 @@ class ModelFactory {
       rrPole.position.x = 0.55;
       canopyGroup.add(flPole, frPole, rlPole, rrPole);
 
-      // Canopy Roof Canvas
-      const roofGeo = new THREE.BoxGeometry(1.35, 0.06, 1.6);
+      // Curved canvas canopy roof
+      const roofGeo = new THREE.BoxGeometry(1.35, 0.05, 1.6);
       const roofMat = new THREE.MeshStandardMaterial({
-        color: cfg.bodyColor === 0x0d47a1 ? 0xffffff : 0xffb300,
-        roughness: 0.8
+        color: cfg.bodyColor === 0x0d47a1 ? 0xfffde7 : 0xffb300,
+        roughness: 0.72,
+        metalness: 0.05
       });
       const roof = new THREE.Mesh(roofGeo, roofMat);
-      roof.position.set(0, 2.02, -0.75);
+      roof.position.set(0, 1.98, -0.75);
       roof.castShadow = true;
       canopyGroup.add(roof);
 
-      // Frill border
-      const frillGeo = new THREE.BoxGeometry(1.36, 0.12, 1.61);
-      const frillMat = new THREE.MeshStandardMaterial({ color: 0xb71c1c });
+      // Indian decorative frill border
+      const frillGeo = new THREE.BoxGeometry(1.37, 0.08, 1.62);
+      const frillMat = new THREE.MeshStandardMaterial({ color: 0xc62828, roughness: 0.8 });
       const frill = new THREE.Mesh(frillGeo, frillMat);
-      frill.position.set(0, 1.95, -0.75);
+      frill.position.set(0, 1.93, -0.75);
       canopyGroup.add(frill);
 
       root.add(canopyGroup);
@@ -2595,10 +2623,10 @@ class ModelFactory {
   // MODULE: world.js
   // ==========================================
 /**
- * Indian Tractor Simulator 3D - Open-World Indian Village Environment
- * Generates an explorable rural Indian landscape with paved & dirt roads,
- * interactive agricultural fields with soil state tracking, farmhouses,
- * canal bridge, tubewell water pump, and Kisan Mandi market.
+ * Indian Tractor Simulator 3D - Realistic Open-World Indian Village Environment
+ * Features procedural PBR textures for grass, asphalt, and furrowed soil,
+ * organic Indian trees (Neem, Sheesham, Banyan), realistic crops, canal bridge,
+ * tubewell water pump, and Kisan Mandi wholesale grain market.
  */
 
 class WorldManager {
@@ -2606,8 +2634,14 @@ class WorldManager {
     this.THREE = THREE;
     this.root = new THREE.Group();
 
-    // Terrain parameters
+    // World size
     this.worldSize = 560;
+
+    // Generate procedural textures
+    this.grassTexture = this.createGrassTexture();
+    this.asphaltTexture = this.createAsphaltTexture();
+    this.soilTexture = this.createSoilTexture();
+    this.barkTexture = this.createBarkTexture();
 
     // Interactive Agricultural Field States
     // Field 1: Wheat Field (90m x 70m)
@@ -2618,7 +2652,7 @@ class WorldManager {
       depth: 70,
       gridCols: 14,
       gridRows: 10,
-      patches: [], // 0: Raw stubble, 1: Cultivated/ploughed, 2: Seeded, 3: Golden ripe
+      patches: [],
       meshGroup: new THREE.Group(),
       cropMeshes: []
     };
@@ -2654,8 +2688,123 @@ class WorldManager {
       field3: { x: 95, z: -85, name: 'Sugarcane Field #3', color: 0x8bc34a }
     };
 
-    // Streetlights for night illumination
     this.streetlights = [];
+    this.clouds = [];
+  }
+
+  // ==========================================
+  // PROCEDURAL TEXTURE GENERATORS
+  // ==========================================
+
+  createGrassTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Rich Indian agricultural meadow base
+    ctx.fillStyle = '#456b28';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Natural soil & grass noise
+    const colors = ['#527e30', '#3b5c22', '#5d8c36', '#69993c', '#405626', '#7a8e3d'];
+    for (let i = 0; i < 4000; i++) {
+      ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+      const x = Math.random() * 512;
+      const y = Math.random() * 512;
+      const w = 2 + Math.random() * 5;
+      const h = 2 + Math.random() * 8;
+      ctx.fillRect(x, y, w, h);
+    }
+
+    const tex = new this.THREE.CanvasTexture(canvas);
+    tex.wrapS = this.THREE.RepeatWrapping;
+    tex.wrapT = this.THREE.RepeatWrapping;
+    tex.repeat.set(45, 45);
+    return tex;
+  }
+
+  createAsphaltTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Dark weathered asphalt
+    ctx.fillStyle = '#262626';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Aggregate stone specks
+    for (let i = 0; i < 2500; i++) {
+      const shade = Math.floor(40 + Math.random() * 35);
+      ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
+      ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
+    }
+
+    // Dirt edge shoulders
+    ctx.fillStyle = 'rgba(100, 75, 50, 0.35)';
+    ctx.fillRect(0, 0, 24, 512);
+    ctx.fillRect(488, 0, 24, 512);
+
+    const tex = new this.THREE.CanvasTexture(canvas);
+    tex.wrapS = this.THREE.RepeatWrapping;
+    tex.wrapT = this.THREE.RepeatWrapping;
+    tex.repeat.set(1, 25);
+    return tex;
+  }
+
+  createSoilTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Deep fertile Indian red-brown soil
+    ctx.fillStyle = '#4a2c1b';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Furrowed soil ridges
+    for (let y = 0; y < 512; y += 16) {
+      ctx.fillStyle = '#382012';
+      ctx.fillRect(0, y, 512, 6);
+      ctx.fillStyle = '#5c3822';
+      ctx.fillRect(0, y + 6, 512, 6);
+    }
+
+    // Organic earth clods
+    for (let i = 0; i < 1500; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#2e1a0e' : '#613b24';
+      ctx.beginPath();
+      ctx.arc(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const tex = new this.THREE.CanvasTexture(canvas);
+    tex.wrapS = this.THREE.RepeatWrapping;
+    tex.wrapT = this.THREE.RepeatWrapping;
+    tex.repeat.set(10, 10);
+    return tex;
+  }
+
+  createBarkTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#3e2723';
+    ctx.fillRect(0, 0, 256, 256);
+
+    for (let i = 0; i < 600; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#271713' : '#52342c';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 3, 12 + Math.random() * 18);
+    }
+
+    const tex = new this.THREE.CanvasTexture(canvas);
+    tex.wrapS = this.THREE.RepeatWrapping;
+    tex.wrapT = this.THREE.RepeatWrapping;
+    tex.repeat.set(1, 4);
+    return tex;
   }
 
   // ==========================================
@@ -2663,67 +2812,52 @@ class WorldManager {
   // ==========================================
 
   getTerrainHeight(x, z) {
-    // Canal ditch cut-out
     if (x > -92 && x < -68 && Math.abs(z + 20) > 8) {
-      // Deep canal channel except at the bridge (z approx -20)
-      return -2.4;
+      return -2.4; // Canal ditch
     }
 
-    // Gentle rural rolling topography
     const wave1 = Math.sin(x * 0.015) * Math.cos(z * 0.015) * 1.5;
     const wave2 = Math.sin(x * 0.035 + 1.2) * Math.cos(z * 0.032) * 0.6;
 
-    // Flatten village center, fields, and mandi
     const distFromCenter = Math.hypot(x, z);
-    if (distFromCenter < 60) return 0.0; // village center flat
-    if (Math.hypot(x - (-75), z - 85) < 55) return 0.2; // Field 1 flat
-    if (Math.hypot(x - 85, z - 95) < 50) return 0.15; // Field 2 flat
-    if (Math.hypot(x - (-140), z - (-120)) < 40) return 0.0; // Mandi flat
+    if (distFromCenter < 60) return 0.0;
+    if (Math.hypot(x - (-75), z - 85) < 55) return 0.2;
+    if (Math.hypot(x - 85, z - 95) < 50) return 0.15;
+    if (Math.hypot(x - (-140), z - (-120)) < 40) return 0.0;
 
     return Math.max(-0.5, wave1 + wave2);
   }
 
   getSurfaceType(x, z) {
-    // 1. Paved Village Road Bypass (Main road)
     if ((Math.abs(x) < 4.5 && z > -160 && z < 160) || (Math.abs(z + 20) < 4.5 && x > -160 && x < 160)) {
       return 'road';
     }
-
-    // 2. Muddy Trail (Southern off-road section)
     if (x > 15 && x < 75 && z < -90 && z > -150) {
       return 'mud';
     }
-
-    // 3. Agricultural Fields
-    if (Math.abs(x - this.field1.centerX) < this.field1.width * 0.5 &&
-        Math.abs(z - this.field1.centerZ) < this.field1.depth * 0.5) {
+    if (Math.abs(x - this.field1.centerX) < this.field1.width * 0.5 && Math.abs(z - this.field1.centerZ) < this.field1.depth * 0.5) {
       return 'field';
     }
-    if (Math.abs(x - this.field2.centerX) < this.field2.width * 0.5 &&
-        Math.abs(z - this.field2.centerZ) < this.field2.depth * 0.5) {
+    if (Math.abs(x - this.field2.centerX) < this.field2.width * 0.5 && Math.abs(z - this.field2.centerZ) < this.field2.depth * 0.5) {
       return 'field';
     }
-    if (Math.abs(x - this.field3.centerX) < this.field3.width * 0.5 &&
-        Math.abs(z - this.field3.centerZ) < this.field3.depth * 0.5) {
+    if (Math.abs(x - this.field3.centerX) < this.field3.width * 0.5 && Math.abs(z - this.field3.centerZ) < this.field3.depth * 0.5) {
       return 'field';
     }
-
-    // 4. Dirt tracks connecting farm sheds and fields
     if (Math.hypot(x - (-20), z - (-25)) < 30 || Math.hypot(x - 35, z - 25) < 25) {
       return 'dirt';
     }
-
     return 'grass';
   }
 
   // ==========================================
-  // BUILD WORLD SCENERY
+  // BUILD SCENERY
   // ==========================================
 
   build() {
     const THREE = this.THREE;
 
-    // 1. Base Terrain Mesh
+    // 1. Realistic Textured Terrain Mesh
     const terrainGeo = new THREE.PlaneGeometry(this.worldSize, this.worldSize, 64, 64);
     terrainGeo.rotateX(-Math.PI / 2);
 
@@ -2736,8 +2870,8 @@ class WorldManager {
     terrainGeo.computeVertexNormals();
 
     const terrainMat = new THREE.MeshStandardMaterial({
-      color: 0x5a7e32, // Lush rural Indian green
-      roughness: 0.9,
+      map: this.grassTexture,
+      roughness: 0.92,
       metalness: 0.05
     });
 
@@ -2745,7 +2879,7 @@ class WorldManager {
     terrain.receiveShadow = true;
     this.root.add(terrain);
 
-    // 2. Road Network
+    // 2. Realistic Roads
     this.buildRoads();
 
     // 3. Canal & Arched Bridge
@@ -2754,78 +2888,84 @@ class WorldManager {
     // 4. Agricultural Fields
     this.buildFields();
 
-    // 5. Village Farmhouses & Brick Buildings
+    // 5. Village Farmhouses
     this.buildVillageStructures();
 
-    // 6. Tubewell Water Pump & Flowing Pond
+    // 6. Tubewell Water Pump
     this.buildTubewellPump();
 
-    // 7. Kisan Mandi (Grain Market)
+    // 7. Kisan Mandi Market
     this.buildKisanMandi();
 
-    // 8. Trees, Foliage & Boundary Walls
-    this.buildVegetationAndProps();
+    // 8. Realistic Organic Trees & Foliage
+    this.buildRealisticVegetation();
+
+    // 9. Clouds
+    this.buildClouds();
 
     return this.root;
   }
 
   buildRoads() {
     const THREE = this.THREE;
-    const roadMat = new THREE.MeshStandardMaterial({
-      color: 0x333333, // Paved asphalt
-      roughness: 0.85
-    });
-    const roadLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-    // North-South Main Village Highway (width 8m, length 320m)
-    const nsRoadGeo = new THREE.PlaneGeometry(8, 320);
+    const roadMat = new THREE.MeshStandardMaterial({
+      map: this.asphaltTexture,
+      roughness: 0.82,
+      metalness: 0.1
+    });
+
+    // North-South Highway
+    const nsRoadGeo = new THREE.PlaneGeometry(8.5, 330);
     nsRoadGeo.rotateX(-Math.PI / 2);
     const nsRoad = new THREE.Mesh(nsRoadGeo, roadMat);
-    nsRoad.position.set(0, 0.04, 0);
+    nsRoad.position.set(0, 0.05, 0);
     nsRoad.receiveShadow = true;
     this.root.add(nsRoad);
 
-    // Center divider dash lines
-    for (let z = -150; z < 150; z += 12) {
-      const dashGeo = new THREE.PlaneGeometry(0.25, 5);
+    // Road White/Yellow Center Lane Marking dashes
+    const roadLineMat = new THREE.MeshBasicMaterial({ color: 0xffeb3b });
+    for (let z = -155; z < 155; z += 10) {
+      const dashGeo = new THREE.PlaneGeometry(0.25, 4.8);
       dashGeo.rotateX(-Math.PI / 2);
       const dash = new THREE.Mesh(dashGeo, roadLineMat);
-      dash.position.set(0, 0.05, z);
+      dash.position.set(0, 0.06, z);
       this.root.add(dash);
     }
 
-    // East-West Farm Link Road (crossing canal over bridge)
-    const ewRoadGeo = new THREE.PlaneGeometry(320, 7.5);
+    // East-West Farm Link Road
+    const ewRoadGeo = new THREE.PlaneGeometry(330, 8);
     ewRoadGeo.rotateX(-Math.PI / 2);
     const ewRoad = new THREE.Mesh(ewRoadGeo, roadMat);
-    ewRoad.position.set(0, 0.04, -20);
+    ewRoad.position.set(0, 0.05, -20);
     ewRoad.receiveShadow = true;
     this.root.add(ewRoad);
 
-    // Dirt trails to farm shed & fields
+    // Dirt farm track with soil texture
     const dirtMat = new THREE.MeshStandardMaterial({
-      color: 0x795548, // Rich Indian red-brown soil
+      map: this.soilTexture,
       roughness: 0.95
     });
 
-    const dirtTrack1Geo = new THREE.PlaneGeometry(120, 6);
-    dirtTrack1Geo.rotateX(-Math.PI / 2);
-    dirtTrack1Geo.rotateY(0.4);
-    const dirtTrack1 = new THREE.Mesh(dirtTrack1Geo, dirtMat);
-    dirtTrack1.position.set(-45, 0.03, 40);
-    dirtTrack1.receiveShadow = true;
-    this.root.add(dirtTrack1);
+    const dirtTrackGeo = new THREE.PlaneGeometry(125, 6.5);
+    dirtTrackGeo.rotateX(-Math.PI / 2);
+    dirtTrackGeo.rotateY(0.4);
+    const dirtTrack = new THREE.Mesh(dirtTrackGeo, dirtMat);
+    dirtTrack.position.set(-45, 0.04, 40);
+    dirtTrack.receiveShadow = true;
+    this.root.add(dirtTrack);
 
     // Southern Muddy Off-Road Trail
     const mudMat = new THREE.MeshStandardMaterial({
-      color: 0x4e342e, // Wet dark mud
-      roughness: 0.35, // Shiny wet mud
-      metalness: 0.2
+      color: 0x3e2723,
+      map: this.soilTexture,
+      roughness: 0.35,
+      metalness: 0.3
     });
     const mudTrailGeo = new THREE.PlaneGeometry(65, 12);
     mudTrailGeo.rotateX(-Math.PI / 2);
     const mudTrail = new THREE.Mesh(mudTrailGeo, mudMat);
-    mudTrail.position.set(45, 0.03, -120);
+    mudTrail.position.set(45, 0.04, -120);
     mudTrail.receiveShadow = true;
     this.root.add(mudTrail);
   }
@@ -2833,23 +2973,23 @@ class WorldManager {
   buildCanalAndBridge() {
     const THREE = this.THREE;
 
-    // Canal Water Stream
-    const canalWaterGeo = new THREE.PlaneGeometry(20, 340);
+    // Flowing Canal Water
+    const canalWaterGeo = new THREE.PlaneGeometry(22, 340);
     canalWaterGeo.rotateX(-Math.PI / 2);
     const canalWaterMat = new THREE.MeshStandardMaterial({
       color: 0x00838f,
-      roughness: 0.1,
-      metalness: 0.8,
+      roughness: 0.08,
+      metalness: 0.85,
       transparent: true,
       opacity: 0.85
     });
     const water = new THREE.Mesh(canalWaterGeo, canalWaterMat);
-    water.position.set(-80, -1.1, 0);
+    water.position.set(-80, -1.05, 0);
     this.root.add(water);
 
     // Brick Arched Bridge spanning canal at z = -20
     const bridgeGroup = new THREE.Group();
-    bridgeGroup.position.set(-80, 0.1, -20);
+    bridgeGroup.position.set(-80, 0.12, -20);
 
     const bridgeDeckGeo = new THREE.BoxGeometry(26, 0.6, 9.5);
     const brickMat = new THREE.MeshStandardMaterial({ color: 0x8d4925, roughness: 0.85 });
@@ -2858,7 +2998,7 @@ class WorldManager {
     bridgeDeck.receiveShadow = true;
     bridgeGroup.add(bridgeDeck);
 
-    // Brick Railings (Guard walls with white pillar caps)
+    // Brick Railings
     const railGeo = new THREE.BoxGeometry(26, 0.9, 0.45);
     const northRail = new THREE.Mesh(railGeo, brickMat);
     northRail.position.set(0, 0.7, 4.5);
@@ -2884,23 +3024,28 @@ class WorldManager {
   buildFields() {
     const THREE = this.THREE;
 
-    // ==========================================
-    // FIELD 1: INTERACTIVE WHEAT FIELD (SOIL GRID)
-    // ==========================================
+    // Field 1: Wheat Field with Furrowed Soil
     const f1 = this.field1;
     const soilBaseGeo = new THREE.PlaneGeometry(f1.width, f1.depth);
     soilBaseGeo.rotateX(-Math.PI / 2);
-    const stubbleMat = new THREE.MeshStandardMaterial({ color: 0x795548, roughness: 0.95 });
-    const f1Base = new THREE.Mesh(soilBaseGeo, stubbleMat);
+    const unploughedMat = new THREE.MeshStandardMaterial({
+      color: 0x6d4c41,
+      map: this.soilTexture,
+      roughness: 0.95
+    });
+    const f1Base = new THREE.Mesh(soilBaseGeo, unploughedMat);
     f1Base.position.set(f1.centerX, 0.05, f1.centerZ);
     f1Base.receiveShadow = true;
     this.root.add(f1Base);
 
-    // Soil Grid Patches
     const patchW = f1.width / f1.gridCols;
     const patchD = f1.depth / f1.gridRows;
-    const ploughedMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.95 }); // Rich dark furrowed soil
-    const wheatCropMat = new THREE.MeshStandardMaterial({ color: 0xd4a017, roughness: 0.8 }); // Golden ripe wheat
+    const ploughedMat = new THREE.MeshStandardMaterial({
+      color: 0x3e2723,
+      map: this.soilTexture,
+      roughness: 0.95
+    });
+    const wheatCropMat = new THREE.MeshStandardMaterial({ color: 0xd4a017, roughness: 0.7 });
 
     f1.meshGroup.position.set(f1.centerX, 0.06, f1.centerZ);
 
@@ -2911,18 +3056,17 @@ class WorldManager {
 
         const patchGeo = new THREE.PlaneGeometry(patchW * 0.96, patchD * 0.96);
         patchGeo.rotateX(-Math.PI / 2);
-        const patchMesh = new THREE.Mesh(patchGeo, stubbleMat);
+        const patchMesh = new THREE.Mesh(patchGeo, unploughedMat);
         patchMesh.position.set(px, 0, pz);
         f1.meshGroup.add(patchMesh);
 
-        // Wheat Crop cluster (hidden until sown/grown)
+        // Wheat stalk clusters
         const cropCluster = new THREE.Group();
         cropCluster.position.set(px, 0, pz);
-        const stalkGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.75, 5);
-        for (let i = 0; i < 5; i++) {
+        const stalkGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.85, 5);
+        for (let i = 0; i < 6; i++) {
           const stalk = new THREE.Mesh(stalkGeo, wheatCropMat);
-          stalk.position.set((Math.random() - 0.5) * patchW * 0.6, 0.38, (Math.random() - 0.5) * patchD * 0.6);
-          stalk.rotation.z = (Math.random() - 0.5) * 0.2;
+          stalk.position.set((Math.random() - 0.5) * patchW * 0.7, 0.42, (Math.random() - 0.5) * patchD * 0.7);
           cropCluster.add(stalk);
         }
         cropCluster.visible = false;
@@ -2933,19 +3077,17 @@ class WorldManager {
           row: r,
           worldX: f1.centerX + px,
           worldZ: f1.centerZ + pz,
-          state: 0, // 0: Raw stubble, 1: Cultivated, 2: Seeded, 3: Golden Ripe
+          state: 0,
           mesh: patchMesh,
           cropMesh: cropCluster,
           ploughedMat,
-          stubbleMat
+          unploughedMat
         });
       }
     }
     this.root.add(f1.meshGroup);
 
-    // ==========================================
-    // FIELD 2: MUSTARD FIELD (SARSON KE KHET)
-    // ==========================================
+    // Field 2: Mustard Field (Yellow flowers)
     const f2 = this.field2;
     const f2SoilGeo = new THREE.PlaneGeometry(f2.width, f2.depth);
     f2SoilGeo.rotateX(-Math.PI / 2);
@@ -2953,22 +3095,19 @@ class WorldManager {
     f2Soil.position.set(f2.centerX, 0.05, f2.centerZ);
     this.root.add(f2Soil);
 
-    // Dense bright yellow mustard flower clusters
-    const mustardMat = new THREE.MeshStandardMaterial({ color: 0xffeb3b, roughness: 0.7 });
-    const flowerGeo = new THREE.DodecahedronGeometry(0.35, 0);
+    const mustardMat = new THREE.MeshStandardMaterial({ color: 0xffd600, roughness: 0.65 });
+    const flowerGeo = new THREE.DodecahedronGeometry(0.42, 1);
     const mustardCluster = new THREE.Group();
-    mustardCluster.position.set(f2.centerX, 0.4, f2.centerZ);
+    mustardCluster.position.set(f2.centerX, 0.45, f2.centerZ);
 
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 110; i++) {
       const flower = new THREE.Mesh(flowerGeo, mustardMat);
       flower.position.set((Math.random() - 0.5) * (f2.width - 4), (Math.random() * 0.4), (Math.random() - 0.5) * (f2.depth - 4));
       mustardCluster.add(flower);
     }
     this.root.add(mustardCluster);
 
-    // ==========================================
-    // FIELD 3: SUGARCANE FIELD (GANNA)
-    // ==========================================
+    // Field 3: Sugarcane Field
     const f3 = this.field3;
     const f3SoilGeo = new THREE.PlaneGeometry(f3.width, f3.depth);
     f3SoilGeo.rotateX(-Math.PI / 2);
@@ -2977,11 +3116,11 @@ class WorldManager {
     this.root.add(f3Soil);
 
     const caneMat = new THREE.MeshStandardMaterial({ color: 0x33691e, roughness: 0.6 });
-    const caneGeo = new THREE.CylinderGeometry(0.12, 0.14, 2.8, 6);
+    const caneGeo = new THREE.CylinderGeometry(0.12, 0.14, 2.9, 6);
     const caneGroup = new THREE.Group();
-    caneGroup.position.set(f3.centerX, 1.4, f3.centerZ);
+    caneGroup.position.set(f3.centerX, 1.45, f3.centerZ);
 
-    for (let i = 0; i < 110; i++) {
+    for (let i = 0; i < 120; i++) {
       const cane = new THREE.Mesh(caneGeo, caneMat);
       cane.position.set((Math.random() - 0.5) * (f3.width - 6), 0, (Math.random() - 0.5) * (f3.depth - 6));
       cane.rotation.z = (Math.random() - 0.5) * 0.15;
@@ -3001,7 +3140,6 @@ class WorldManager {
           patch.state = 1;
           patch.mesh.material = patch.ploughedMat;
         } else if (!isPloughing && patch.state === 1) {
-          // Sowing seeds
           patch.state = 2;
           patch.cropMesh.visible = true;
         }
@@ -3009,26 +3147,24 @@ class WorldManager {
       if (patch.state >= 1) cultivatedCount++;
     }
 
-    return (cultivatedCount / total) * 100; // Percentage cultivated
+    return (cultivatedCount / total) * 100;
   }
 
   buildVillageStructures() {
     const THREE = this.THREE;
 
-    // 1. Starting Farm Shed (Tractor parking garage)
+    // 1. Starting Farm Shed
     const shedGroup = new THREE.Group();
     shedGroup.position.set(-20, 0, -25);
 
-    // Corrugated iron curved roof
     const roofGeo = new THREE.CylinderGeometry(4.8, 4.8, 12, 16, 1, false, 0, Math.PI);
     roofGeo.rotateZ(Math.PI / 2);
-    const ironRoofMat = new THREE.MeshStandardMaterial({ color: 0x546e7a, roughness: 0.6, metalness: 0.7 });
+    const ironRoofMat = new THREE.MeshStandardMaterial({ color: 0x546e7a, roughness: 0.55, metalness: 0.75 });
     const shedRoof = new THREE.Mesh(roofGeo, ironRoofMat);
     shedRoof.position.set(0, 3.8, 0);
     shedRoof.castShadow = true;
     shedGroup.add(shedRoof);
 
-    // 4 Steel support columns
     const colGeo = new THREE.CylinderGeometry(0.12, 0.12, 4.2, 8);
     const colMat = new THREE.MeshStandardMaterial({ color: 0x263238, metalness: 0.8 });
     for (const cx of [-3.8, 3.8]) {
@@ -3041,18 +3177,17 @@ class WorldManager {
     }
     this.root.add(shedGroup);
 
-    // 2. Village Pukka Brick Farmhouses
+    // 2. Village Pukka Farmhouses
     const houseConfigs = [
-      { x: -45, z: -55, color: 0x1976d2, name: "Elder House" }, // Swaraj blue painted house
-      { x: -55, z: -75, color: 0xfff9c4, name: "Haveli" },      // Light cream house
-      { x: 30, z: -45, color: 0xffcc80, name: "Farmhouse" }      // Warm saffron house
+      { x: -45, z: -55, color: 0x1976d2, name: "Elder House" },
+      { x: -55, z: -75, color: 0xfff9c4, name: "Haveli" },
+      { x: 30, z: -45, color: 0xffcc80, name: "Farmhouse" }
     ];
 
     houseConfigs.forEach(h => {
       const house = new THREE.Group();
       house.position.set(h.x, 0, h.z);
 
-      // Main House Block
       const wallMat = new THREE.MeshStandardMaterial({ color: h.color, roughness: 0.85 });
       const mainGeo = new THREE.BoxGeometry(11, 4.2, 8);
       const mainWall = new THREE.Mesh(mainGeo, wallMat);
@@ -3061,14 +3196,13 @@ class WorldManager {
       mainWall.receiveShadow = true;
       house.add(mainWall);
 
-      // Flat Roof Parapet Wall
       const roofFloorGeo = new THREE.BoxGeometry(11.4, 0.3, 8.4);
       const concreteMat = new THREE.MeshStandardMaterial({ color: 0xb0bec5, roughness: 0.9 });
       const roofFloor = new THREE.Mesh(roofFloorGeo, concreteMat);
       roofFloor.position.set(0, 4.35, 0);
       house.add(roofFloor);
 
-      // Sintex Black Water Tank on Rooftop (Authentic Indian Detail)
+      // Sintex Water Tank
       const tankGeo = new THREE.CylinderGeometry(0.8, 0.8, 1.4, 16);
       const tankMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 });
       const tank = new THREE.Mesh(tankGeo, tankMat);
@@ -3076,26 +3210,12 @@ class WorldManager {
       tank.castShadow = true;
       house.add(tank);
 
-      // Wooden Entrance Door & Windows
+      // Door
       const doorMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
       const doorGeo = new THREE.BoxGeometry(1.4, 2.6, 0.1);
       const door = new THREE.Mesh(doorGeo, doorMat);
       door.position.set(0, 1.3, 4.05);
       house.add(door);
-
-      // Traditional Charpai (Indian woven cot in front of house)
-      const cotGroup = new THREE.Group();
-      cotGroup.position.set(3.5, 0.3, 5.8);
-      const cotFrame = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 1.1), new THREE.MeshStandardMaterial({ color: 0x8d6e63 }));
-      cotGroup.add(cotFrame);
-      for (const lx of [-0.9, 0.9]) {
-        for (const lz of [-0.45, 0.45]) {
-          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0x5d4037 }));
-          leg.position.set(lx, -0.18, lz);
-          cotGroup.add(leg);
-        }
-      }
-      house.add(cotGroup);
 
       this.root.add(house);
     });
@@ -3106,7 +3226,6 @@ class WorldManager {
     const pumpGroup = new THREE.Group();
     pumpGroup.position.set(35, 0, 25);
 
-    // Pump house room
     const pumpHouseGeo = new THREE.BoxGeometry(4.2, 3.2, 4.2);
     const brickMat = new THREE.MeshStandardMaterial({ color: 0xb71c1c, roughness: 0.9 });
     const pumpHouse = new THREE.Mesh(pumpHouseGeo, brickMat);
@@ -3114,21 +3233,18 @@ class WorldManager {
     pumpHouse.castShadow = true;
     pumpGroup.add(pumpHouse);
 
-    // Heavy Delivery Water Pipe (Delivery tube gushing into pool)
     const pipeGeo = new THREE.CylinderGeometry(0.18, 0.18, 3.2, 12);
     pipeGeo.rotateZ(Math.PI / 2);
     const pipe = new THREE.Mesh(pipeGeo, new THREE.MeshStandardMaterial({ color: 0x37474f, metalness: 0.8 }));
     pipe.position.set(2.8, 1.1, 0);
     pumpGroup.add(pipe);
 
-    // Concrete Water Irrigation Trough & Pond
     const troughGeo = new THREE.BoxGeometry(6.5, 0.6, 4.5);
     const concreteMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, roughness: 0.8 });
     const trough = new THREE.Mesh(troughGeo, concreteMat);
     trough.position.set(6.2, 0.3, 0);
     pumpGroup.add(trough);
 
-    // Water Surface in Trough
     const waterGeo = new THREE.PlaneGeometry(5.8, 3.8);
     waterGeo.rotateX(-Math.PI / 2);
     const waterMat = new THREE.MeshStandardMaterial({
@@ -3150,7 +3266,6 @@ class WorldManager {
     const mandiGroup = new THREE.Group();
     mandiGroup.position.set(-140, 0, -120);
 
-    // Large Covered Mandi Shed Platform
     const platformGeo = new THREE.BoxGeometry(32, 0.5, 24);
     const platformMat = new THREE.MeshStandardMaterial({ color: 0x78909c, roughness: 0.9 });
     const platform = new THREE.Mesh(platformGeo, platformMat);
@@ -3158,7 +3273,6 @@ class WorldManager {
     platform.receiveShadow = true;
     mandiGroup.add(platform);
 
-    // High Tin Canopy Roof
     const roofGeo = new THREE.BoxGeometry(34, 0.2, 26);
     const roofMat = new THREE.MeshStandardMaterial({ color: 0x0288d1, roughness: 0.5, metalness: 0.4 });
     const roof = new THREE.Mesh(roofGeo, roofMat);
@@ -3166,7 +3280,6 @@ class WorldManager {
     roof.castShadow = true;
     mandiGroup.add(roof);
 
-    // Steel Pillars
     const colGeo = new THREE.CylinderGeometry(0.18, 0.18, 6.0, 10);
     const colMat = new THREE.MeshStandardMaterial({ color: 0x263238, metalness: 0.8 });
     for (const cx of [-15, 0, 15]) {
@@ -3178,7 +3291,6 @@ class WorldManager {
       }
     }
 
-    // Huge Stacks of Jute Grain Sacks in Mandi
     const sackMat = new THREE.MeshStandardMaterial({ color: 0xc4a375, roughness: 0.9 });
     const sackGeo = new THREE.BoxGeometry(0.8, 0.35, 1.2);
     for (let stack = 0; stack < 6; stack++) {
@@ -3193,7 +3305,6 @@ class WorldManager {
       }
     }
 
-    // Unloading Drop Zone Marker Ring
     const ringGeo = new THREE.RingGeometry(3.5, 4.2, 32);
     ringGeo.rotateX(-Math.PI / 2);
     const ringMat = new THREE.MeshBasicMaterial({ color: 0xff9800, side: THREE.DoubleSide });
@@ -3201,70 +3312,123 @@ class WorldManager {
     markerRing.position.set(0, 0.55, 6);
     mandiGroup.add(markerRing);
 
-    // Big Hindi/English Sign Board: "KISAN GRAIN MANDI"
-    const signBoardGeo = new THREE.BoxGeometry(14, 1.8, 0.2);
-    const signMat = new THREE.MeshStandardMaterial({ color: 0xffeb3b });
-    const sign = new THREE.Mesh(signBoardGeo, signMat);
-    sign.position.set(0, 7.2, 13);
-    mandiGroup.add(sign);
-
     this.root.add(mandiGroup);
   }
 
-  buildVegetationAndProps() {
+  // ==========================================
+  // REALISTIC ORGANIC TREES & FOLIAGE
+  // ==========================================
+
+  buildRealisticVegetation() {
     const THREE = this.THREE;
 
-    // 1. Village Banyan Tree (Peepal / Bargad with concrete seating platform)
+    // Organic Tree Trunk Material (textured bark)
+    const trunkMat = new THREE.MeshStandardMaterial({
+      map: this.barkTexture,
+      roughness: 0.95,
+      metalness: 0.05
+    });
+
+    // Realistic Foliage Palette (Deep forest green, olive, lush meadow green)
+    const leafColors = [0x2e5621, 0x3d6e2e, 0x24441a, 0x487a36];
+    const leafMats = leafColors.map(c => new THREE.MeshStandardMaterial({
+      color: c,
+      roughness: 0.85,
+      metalness: 0.05
+    }));
+
+    // Helper: Create Realistic Multi-Cluster Organic Tree
+    const createOrganicTree = (height = 6.5, crownRadius = 2.8) => {
+      const tree = new THREE.Group();
+
+      // Tapered trunk
+      const trunkGeo = new THREE.CylinderGeometry(0.2, 0.38, height, 10);
+      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+      trunk.position.set(0, height * 0.5, 0);
+      trunk.castShadow = true;
+      tree.add(trunk);
+
+      // Multi-spherical organic crown (3-5 overlapping organic clusters)
+      const clusterCount = 4 + Math.floor(Math.random() * 2);
+      const clusterGeo = new THREE.DodecahedronGeometry(crownRadius * 0.65, 1);
+
+      for (let i = 0; i < clusterCount; i++) {
+        const mat = leafMats[Math.floor(Math.random() * leafMats.length)];
+        const cluster = new THREE.Mesh(clusterGeo, mat);
+
+        const offsetX = (Math.random() - 0.5) * crownRadius * 0.9;
+        const offsetY = height * 0.85 + (Math.random() - 0.5) * crownRadius * 0.8;
+        const offsetZ = (Math.random() - 0.5) * crownRadius * 0.9;
+        const scale = 0.75 + Math.random() * 0.5;
+
+        cluster.position.set(offsetX, offsetY, offsetZ);
+        cluster.scale.set(scale, scale * 0.85, scale);
+        cluster.castShadow = true;
+        tree.add(cluster);
+      }
+
+      return tree;
+    };
+
+    // 1. Sprawling Village Banyan Tree (Bargad) at Village Square
     const banyanGroup = new THREE.Group();
     banyanGroup.position.set(12, 0, 15);
 
-    // Concrete circular platform (Chabutra)
-    const chabutraGeo = new THREE.CylinderGeometry(4.2, 4.5, 0.7, 24);
-    const chabutra = new THREE.Mesh(chabutraGeo, new THREE.MeshStandardMaterial({ color: 0xcfd8dc }));
+    const chabutraGeo = new THREE.CylinderGeometry(4.8, 5.2, 0.7, 24);
+    const chabutra = new THREE.Mesh(chabutraGeo, new THREE.MeshStandardMaterial({ color: 0x9e9e9e, roughness: 0.9 }));
     chabutra.position.set(0, 0.35, 0);
     banyanGroup.add(chabutra);
 
-    // Massive Trunk & Foliage
-    const trunkGeo = new THREE.CylinderGeometry(0.8, 1.4, 6.5, 12);
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4e342e, roughness: 0.9 });
-    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-    trunk.position.set(0, 3.5, 0);
-    trunk.castShadow = true;
-    banyanGroup.add(trunk);
+    const bTrunk = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.8, 7.5, 12), trunkMat);
+    bTrunk.position.set(0, 4.0, 0);
+    bTrunk.castShadow = true;
+    banyanGroup.add(bTrunk);
 
-    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.85 });
-    for (let f = 0; f < 6; f++) {
-      const canopyBall = new THREE.Mesh(new THREE.DodecahedronGeometry(3.2 + Math.random() * 1.2, 1), foliageMat);
-      canopyBall.position.set((Math.random() - 0.5) * 4.5, 7.2 + Math.random() * 2, (Math.random() - 0.5) * 4.5);
-      canopyBall.castShadow = true;
-      banyanGroup.add(canopyBall);
+    // Spreading canopy
+    for (let f = 0; f < 9; f++) {
+      const mat = leafMats[f % leafMats.length];
+      const canopy = new THREE.Mesh(new THREE.DodecahedronGeometry(3.6 + Math.random() * 1.2, 1), mat);
+      canopy.position.set((Math.random() - 0.5) * 8.5, 7.5 + Math.random() * 2.5, (Math.random() - 0.5) * 8.5);
+      canopy.castShadow = true;
+      banyanGroup.add(canopy);
+    }
+
+    // Hanging prop roots
+    for (let r = 0; r < 6; r++) {
+      const rootGeo = new THREE.CylinderGeometry(0.06, 0.08, 6.2, 6);
+      const pRoot = new THREE.Mesh(rootGeo, trunkMat);
+      pRoot.position.set((Math.random() - 0.5) * 6.5, 3.1, (Math.random() - 0.5) * 6.5);
+      pRoot.castShadow = true;
+      banyanGroup.add(pRoot);
     }
     this.root.add(banyanGroup);
 
-    // 2. Roadside Trees (Neem & Eucalyptus lining the road)
+    // 2. Roadside Organic Trees (Neem, Sheesham & Eucalyptus)
     for (let i = 0; i < 28; i++) {
-      const z = -140 + i * 10;
-      if (Math.abs(z + 20) < 14) continue; // Skip bridge intersection
+      const z = -140 + i * 10.5;
+      if (Math.abs(z + 20) < 14) continue; // Skip canal bridge junction
 
-      for (const side of [-5.5, 5.5]) {
-        const tree = new THREE.Group();
+      for (const side of [-6.2, 6.2]) {
+        const tree = createOrganicTree(6.2 + Math.random() * 1.8, 2.6 + Math.random() * 0.8);
         tree.position.set(side, 0, z);
-
-        const tTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, 4.5, 8), trunkMat);
-        tTrunk.position.set(0, 2.25, 0);
-        tTrunk.castShadow = true;
-        tree.add(tTrunk);
-
-        const tFoliage = new THREE.Mesh(new THREE.ConeGeometry(1.8, 4.2, 8), foliageMat);
-        tFoliage.position.set(0, 5.2, 0);
-        tFoliage.castShadow = true;
-        tree.add(tFoliage);
-
         this.root.add(tree);
       }
     }
 
-    // 3. Village Streetlights (Working lights for Night driving!)
+    // 3. Roadside Wildflower Patches & Shrubs
+    const shrubMat = new THREE.MeshStandardMaterial({ color: 0x33691e, roughness: 0.9 });
+    const shrubGeo = new THREE.DodecahedronGeometry(0.65, 0);
+
+    for (let s = 0; s < 45; s++) {
+      const shrub = new THREE.Mesh(shrubGeo, shrubMat);
+      const side = (Math.random() > 0.5 ? 1 : -1) * (4.8 + Math.random() * 3.5);
+      const sz = -130 + Math.random() * 260;
+      shrub.position.set(side, 0.4, sz);
+      shrub.scale.set(1 + Math.random() * 0.6, 0.8, 1 + Math.random() * 0.6);
+      this.root.add(shrub);
+    }
+
+    // 4. Village Streetlights (Working lights for Night driving!)
     const poleMat = new THREE.MeshStandardMaterial({ color: 0x37474f, metalness: 0.8 });
     const lampMat = new THREE.MeshBasicMaterial({ color: 0xfffae0 });
 
@@ -3273,30 +3437,26 @@ class WorldManager {
       { x: 5.5, z: -10 },
       { x: -5.5, z: 40 },
       { x: 5.5, z: 90 },
-      { x: -125, z: -120 } // Mandi light
+      { x: -125, z: -120 }
     ];
 
     lightPositions.forEach(lp => {
       const lightPost = new THREE.Group();
       lightPost.position.set(lp.x, 0, lp.z);
 
-      // Steel pole
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 6.5, 8), poleMat);
       pole.position.set(0, 3.25, 0);
       pole.castShadow = true;
       lightPost.add(pole);
 
-      // Overhanging curved arm
       const arm = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.08), poleMat);
       arm.position.set(lp.x < 0 ? 0.7 : -0.7, 6.4, 0);
       lightPost.add(arm);
 
-      // Glowing Lamp
       const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), lampMat);
       lamp.position.set(lp.x < 0 ? 1.4 : -1.4, 6.3, 0);
       lightPost.add(lamp);
 
-      // PointLight illumination source
       const pointLight = new THREE.PointLight(0xfffae0, 0, 32, 1.2);
       pointLight.position.set(lp.x < 0 ? 1.4 : -1.4, 6.0, 0);
       lightPost.add(pointLight);
@@ -3304,17 +3464,37 @@ class WorldManager {
       this.streetlights.push(pointLight);
       this.root.add(lightPost);
     });
+  }
 
-    // 4. Milestone Markers
-    const milestoneGeo = new THREE.CylinderGeometry(0.25, 0.25, 1.0, 12);
-    const msWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    const msYellowMat = new THREE.MeshStandardMaterial({ color: 0xffeb3b });
+  buildClouds() {
+    const THREE = this.THREE;
+    const cloudMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.9,
+      transparent: true,
+      opacity: 0.82
+    });
 
-    const ms1 = new THREE.Mesh(milestoneGeo, msWhiteMat);
-    ms1.position.set(4.8, 0.5, 5);
-    const msCap = new THREE.Mesh(new THREE.SphereGeometry(0.25, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), msYellowMat);
-    msCap.position.set(4.8, 1.0, 5);
-    this.root.add(ms1, msCap);
+    for (let c = 0; c < 14; c++) {
+      const cloud = new THREE.Group();
+      const puffCount = 4 + Math.floor(Math.random() * 4);
+
+      for (let p = 0; p < puffCount; p++) {
+        const puffGeo = new THREE.DodecahedronGeometry(10 + Math.random() * 8, 1);
+        const puff = new THREE.Mesh(puffGeo, cloudMat);
+        puff.position.set((Math.random() - 0.5) * 32, (Math.random() - 0.5) * 6, (Math.random() - 0.5) * 25);
+        puff.scale.set(1.4, 0.65, 1.0);
+        cloud.add(puff);
+      }
+
+      cloud.position.set(
+        (Math.random() - 0.5) * 450,
+        75 + Math.random() * 25,
+        (Math.random() - 0.5) * 450
+      );
+      this.root.add(cloud);
+      this.clouds.push(cloud);
+    }
   }
 
   setStreetlightsActive(active) {
@@ -3536,8 +3716,8 @@ class WeatherSystem {
   // ==========================================
 /**
  * Indian Tractor Simulator 3D - Camera Controller
- * Supports 5 working camera modes:
- * 1. Third-Person Chase (smooth damping)
+ * Supports 5 working camera modes with 360° interactive mouse/touch orbit:
+ * 1. Third-Person Chase (smooth elevated look-over-roof angle + free mouse orbit)
  * 2. Close Rear (hitch alignment view)
  * 3. Driver Cab First-Person (cockpit & hood view)
  * 4. Front Bumper
@@ -3558,16 +3738,15 @@ class CameraController {
     this.targetLook = new THREE.Vector3();
     this.currentLook = new THREE.Vector3();
 
-    // Orbit parameters
+    // Dynamic Free Look & Orbit parameters (Works in Chase mode too!)
+    this.chaseYawOffset = 0;
+    this.chasePitchOffset = 0;
     this.orbitYaw = 0;
     this.orbitPitch = 0.35;
-    this.orbitDistance = 8.5;
+    this.orbitDistance = 9.5;
     this.isDragging = false;
     this.prevMouseX = 0;
     this.prevMouseY = 0;
-
-    // Shake & engine vibration
-    this.vibrationAmount = 0;
   }
 
   setMode(mode) {
@@ -3594,8 +3773,13 @@ class CameraController {
     const dx = x - this.prevMouseX;
     const dy = y - this.prevMouseY;
 
-    this.orbitYaw -= dx * 0.006;
-    this.orbitPitch = Math.max(0.05, Math.min(1.4, this.orbitPitch + dy * 0.006));
+    // Free look in Chase mode
+    this.chaseYawOffset -= dx * 0.007;
+    this.chasePitchOffset = Math.max(-0.45, Math.min(0.65, this.chasePitchOffset - dy * 0.005));
+
+    // Full orbit in Orbit mode
+    this.orbitYaw -= dx * 0.007;
+    this.orbitPitch = Math.max(0.08, Math.min(1.35, this.orbitPitch + dy * 0.006));
 
     this.prevMouseX = x;
     this.prevMouseY = y;
@@ -3606,45 +3790,54 @@ class CameraController {
   }
 
   handleZoom(delta) {
-    this.orbitDistance = Math.max(4.0, Math.min(22.0, this.orbitDistance + delta * 0.01));
+    this.orbitDistance = Math.max(5.0, Math.min(24.0, this.orbitDistance + delta * 0.012));
   }
 
   update(dt, tractorX, tractorY, tractorZ, tractorHeading, tractorPitch, speed, rpm) {
     const THREE = this.THREE;
 
-    // Small engine vibration when tractor is idling or revving
-    const vib = (rpm / 2400) * 0.015;
+    // Subtle engine vibration
+    const vib = (rpm / 2400) * 0.012;
     const vibOffset = Math.sin(Date.now() * 0.04) * vib;
+
+    // When driving forward and player is NOT dragging, gently auto-center chase camera
+    if (!this.isDragging && Math.abs(speed) > 0.6) {
+      this.chaseYawOffset *= Math.max(0, 1 - dt * 1.5);
+      this.chasePitchOffset *= Math.max(0, 1 - dt * 1.5);
+    }
 
     switch (this.mode) {
       case 'chase': {
-        // Positioned 7.5m behind, 3.2m above tractor
-        const dist = 7.5 + Math.min(3.5, Math.abs(speed) * 0.25);
-        const height = 3.2 + vibOffset;
+        // High angle chase: Elevated above the canopy roof (height 4.3m, distance 9.2m)
+        // Gives wide panoramic driving view over tractor hood and road ahead!
+        const totalYaw = tractorHeading + this.chaseYawOffset;
+        const dist = (this.orbitDistance || 9.2) + Math.min(2.5, Math.abs(speed) * 0.2);
+        const height = 4.3 + this.chasePitchOffset * 3.5 + vibOffset;
 
-        const behindX = tractorX - Math.sin(tractorHeading) * dist;
-        const behindZ = tractorZ - Math.cos(tractorHeading) * dist;
+        const behindX = tractorX - Math.sin(totalYaw) * dist;
+        const behindZ = tractorZ - Math.cos(totalYaw) * dist;
 
         this.targetPos.set(behindX, tractorY + height, behindZ);
-        this.targetLook.set(tractorX, tractorY + 1.2, tractorZ);
+        this.targetLook.set(tractorX, tractorY + 1.35, tractorZ);
 
         // Smooth spring interpolation
-        this.camera.position.lerp(this.targetPos, Math.min(1, dt * 7.0));
-        this.currentLook.lerp(this.targetLook, Math.min(1, dt * 10.0));
+        this.camera.position.lerp(this.targetPos, Math.min(1, dt * 9.0));
+        this.currentLook.lerp(this.targetLook, Math.min(1, dt * 12.0));
         this.camera.lookAt(this.currentLook);
         break;
       }
 
       case 'close_rear': {
-        // Tight 3.8m behind hitch - perfect for trailer reversing
-        const dist = 3.8;
-        const height = 1.9 + vibOffset;
+        // Tight 4.2m behind hitch - perfect for trailer hitching
+        const totalYaw = tractorHeading + this.chaseYawOffset;
+        const dist = 4.2;
+        const height = 2.4 + vibOffset;
 
-        const behindX = tractorX - Math.sin(tractorHeading) * dist;
-        const behindZ = tractorZ - Math.cos(tractorHeading) * dist;
+        const behindX = tractorX - Math.sin(totalYaw) * dist;
+        const behindZ = tractorZ - Math.cos(totalYaw) * dist;
 
         this.targetPos.set(behindX, tractorY + height, behindZ);
-        this.targetLook.set(tractorX - Math.sin(tractorHeading) * 1.2, tractorY + 0.6, tractorZ - Math.cos(tractorHeading) * 1.2);
+        this.targetLook.set(tractorX - Math.sin(tractorHeading) * 1.0, tractorY + 0.8, tractorZ - Math.cos(tractorHeading) * 1.0);
 
         this.camera.position.lerp(this.targetPos, Math.min(1, dt * 12.0));
         this.currentLook.lerp(this.targetLook, Math.min(1, dt * 12.0));
@@ -3653,40 +3846,40 @@ class CameraController {
       }
 
       case 'cab_driver': {
-        // Cockpit view: at the driver seat looking over the steering wheel and hood
-        const cabX = tractorX - Math.sin(tractorHeading) * 0.75;
-        const cabZ = tractorZ - Math.cos(tractorHeading) * 0.75;
-        const cabY = tractorY + 1.55 + vibOffset;
+        // Cockpit driver seat view looking over steering wheel and bonnet
+        const cabX = tractorX - Math.sin(tractorHeading) * 0.7;
+        const cabZ = tractorZ - Math.cos(tractorHeading) * 0.7;
+        const cabY = tractorY + 1.62 + vibOffset;
 
         this.camera.position.set(cabX, cabY, cabZ);
 
-        // Look forward along hood
-        const lookX = tractorX + Math.sin(tractorHeading) * 8.0;
-        const lookZ = tractorZ + Math.cos(tractorHeading) * 8.0;
-        this.camera.lookAt(lookX, tractorY + 1.2, lookZ);
+        const lookYaw = tractorHeading + this.chaseYawOffset * 0.7;
+        const lookX = tractorX + Math.sin(lookYaw) * 12.0;
+        const lookZ = tractorZ + Math.cos(lookYaw) * 12.0;
+        this.camera.lookAt(lookX, tractorY + 1.3, lookZ);
         break;
       }
 
       case 'bumper': {
         // Low front bumper camera
-        const frontX = tractorX + Math.sin(tractorHeading) * 1.8;
-        const frontZ = tractorZ + Math.cos(tractorHeading) * 1.8;
+        const frontX = tractorX + Math.sin(tractorHeading) * 2.0;
+        const frontZ = tractorZ + Math.cos(tractorHeading) * 2.0;
 
-        this.camera.position.set(frontX, tractorY + 0.45, frontZ);
-        const lookX = tractorX + Math.sin(tractorHeading) * 12.0;
-        const lookZ = tractorZ + Math.cos(tractorHeading) * 12.0;
-        this.camera.lookAt(lookX, tractorY + 0.4, lookZ);
+        this.camera.position.set(frontX, tractorY + 0.55, frontZ);
+        const lookX = tractorX + Math.sin(tractorHeading) * 14.0;
+        const lookZ = tractorZ + Math.cos(tractorHeading) * 14.0;
+        this.camera.lookAt(lookX, tractorY + 0.5, lookZ);
         break;
       }
 
       case 'orbit': {
-        // Orbit around tractor
+        // 360 Free inspection orbit
         const ox = tractorX + Math.sin(this.orbitYaw) * Math.cos(this.orbitPitch) * this.orbitDistance;
-        const oy = tractorY + Math.sin(this.orbitPitch) * this.orbitDistance + 1.0;
+        const oy = tractorY + Math.sin(this.orbitPitch) * this.orbitDistance + 1.2;
         const oz = tractorZ + Math.cos(this.orbitYaw) * Math.cos(this.orbitPitch) * this.orbitDistance;
 
         this.camera.position.set(ox, oy, oz);
-        this.camera.lookAt(tractorX, tractorY + 1.2, tractorZ);
+        this.camera.lookAt(tractorX, tractorY + 1.3, tractorZ);
         break;
       }
     }
@@ -4329,7 +4522,7 @@ class UIManager {
 
         <!-- Minimap Radar -->
         <div class="minimap-container">
-          <canvas id="minimap-canvas" width="160" height="160"></canvas>
+          <canvas id="minimap-canvas" width="170" height="170"></canvas>
           <div class="minimap-label">GPS RADAR</div>
         </div>
 
@@ -4783,53 +4976,97 @@ class UIManager {
     const h = this.minimapCanvas.height;
     const cx = w * 0.5;
     const cy = h * 0.5;
-    const scale = 0.55; // pixels per world meter
+    const scale = 0.48; // scale: pixels per world meter
 
     ctx.clearRect(0, 0, w, h);
 
-    // Background circle radar
     ctx.save();
+    // Circular radar clipping mask
     ctx.beginPath();
-    ctx.arc(cx, cy, w * 0.48, 0, Math.PI * 2);
+    ctx.arc(cx, cy, w * 0.47, 0, Math.PI * 2);
     ctx.clip();
 
-    ctx.fillStyle = '#2e4922';
+    // Radar dark agricultural background
+    ctx.fillStyle = '#162412';
     ctx.fillRect(0, 0, w, h);
 
-    // Grid lines
-    ctx.strokeStyle = '#3e5e30';
+    // Range rings (50m, 100m)
+    ctx.strokeStyle = 'rgba(76, 175, 80, 0.22)';
     ctx.lineWidth = 1;
-    for (let i = -150; i <= 150; i += 30) {
-      ctx.beginPath();
-      ctx.moveTo(cx + (i - tractorX) * scale, 0);
-      ctx.lineTo(cx + (i - tractorX) * scale, h);
-      ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, 40 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, 90 * scale, 0, Math.PI * 2);
+    ctx.stroke();
 
-      ctx.beginPath();
-      ctx.moveTo(0, cy + (i - tractorZ) * scale);
-      ctx.lineTo(w, cy + (i - tractorZ) * scale);
-      ctx.stroke();
+    // 1. Roads (10px wide with yellow dashes)
+    ctx.fillStyle = '#262626';
+    // North-south highway
+    const nsRoadX = cx + (0 - tractorX) * scale - 5;
+    ctx.fillRect(nsRoadX, 0, 10, h);
+
+    // East-west farm link road
+    const ewRoadY = cy + (-20 - tractorZ) * scale - 5;
+    ctx.fillRect(0, ewRoadY, w, 10);
+
+    // Road yellow center dashes
+    ctx.fillStyle = '#ffd54f';
+    for (let rz = -160; rz < 160; rz += 18) {
+      const dy = cy + (rz - tractorZ) * scale;
+      if (dy >= 0 && dy <= h) {
+        ctx.fillRect(cx + (0 - tractorX) * scale - 1, dy - 4, 2, 8);
+      }
     }
 
-    // Roads
-    ctx.fillStyle = '#444444';
-    // North-south road (x ~ 0)
-    ctx.fillRect(cx + (0 - tractorX) * scale - 2, 0, 4, h);
-    // East-west road (z ~ -20)
-    ctx.fillRect(0, cy + (-20 - tractorZ) * scale - 2, w, 4);
-
-    // Canal
+    // 2. Canal Water Stream
     ctx.fillStyle = '#00838f';
-    ctx.fillRect(cx + (-80 - tractorX) * scale - 5, 0, 10, h);
+    ctx.fillRect(cx + (-80 - tractorX) * scale - 6, 0, 12, h);
+    // Canal bridge deck
+    ctx.fillStyle = '#8d4925';
+    ctx.fillRect(cx + (-80 - tractorX) * scale - 8, ewRoadY - 1, 16, 12);
 
-    // Fields
-    ctx.fillStyle = 'rgba(212, 160, 23, 0.4)'; // Wheat field #1
-    ctx.fillRect(cx + (-75 - 45 - tractorX) * scale, cy + (85 - 35 - tractorZ) * scale, 90 * scale, 70 * scale);
+    // 3. Fields with Labels
+    // Field 1: Wheat
+    const f1X = cx + (-75 - 45 - tractorX) * scale;
+    const f1Y = cy + (85 - 35 - tractorZ) * scale;
+    ctx.fillStyle = 'rgba(212, 160, 23, 0.45)';
+    ctx.fillRect(f1X, f1Y, 90 * scale, 70 * scale);
+    ctx.strokeStyle = '#d4a017';
+    ctx.strokeRect(f1X, f1Y, 90 * scale, 70 * scale);
+    ctx.fillStyle = '#ffecb3';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.fillText('WHEAT', f1X + 6, f1Y + 14);
 
-    ctx.fillStyle = 'rgba(255, 235, 59, 0.4)'; // Mustard field #2
-    ctx.fillRect(cx + (85 - 40 - tractorX) * scale, cy + (95 - 30 - tractorZ) * scale, 80 * scale, 60 * scale);
+    // Field 2: Mustard
+    const f2X = cx + (85 - 40 - tractorX) * scale;
+    const f2Y = cy + (95 - 30 - tractorZ) * scale;
+    ctx.fillStyle = 'rgba(255, 235, 59, 0.45)';
+    ctx.fillRect(f2X, f2Y, 80 * scale, 60 * scale);
+    ctx.strokeStyle = '#fbc02d';
+    ctx.strokeRect(f2X, f2Y, 80 * scale, 60 * scale);
+    ctx.fillStyle = '#fff9c4';
+    ctx.fillText('SARSON', f2X + 4, f2Y + 14);
 
-    // Waypoints
+    // Field 3: Sugarcane
+    const f3X = cx + (95 - 50 - tractorX) * scale;
+    const f3Y = cy + (-85 - 35 - tractorZ) * scale;
+    ctx.fillStyle = 'rgba(76, 175, 80, 0.45)';
+    ctx.fillRect(f3X, f3Y, 105 * scale, 75 * scale);
+    ctx.strokeStyle = '#388e3c';
+    ctx.strokeRect(f3X, f3Y, 105 * scale, 75 * scale);
+    ctx.fillStyle = '#c8e6c9';
+    ctx.fillText('GANNA', f3X + 4, f3Y + 14);
+
+    // Kisan Mandi platform
+    const mandiX = cx + (-140 - tractorX) * scale;
+    const mandiY = cy + (-120 - tractorZ) * scale;
+    ctx.fillStyle = '#ff9800';
+    ctx.fillRect(mandiX - 10, mandiY - 8, 20, 16);
+    ctx.fillStyle = '#fff';
+    ctx.fillText('MANDI', mandiX - 14, mandiY - 10);
+
+    // 4. Waypoint Landmarks
     for (const key in waypoints) {
       const wp = waypoints[key];
       const wx = cx + (wp.x - tractorX) * scale;
@@ -4837,51 +5074,77 @@ class UIManager {
 
       ctx.fillStyle = '#' + wp.color.toString(16).padStart(6, '0');
       ctx.beginPath();
-      ctx.arc(wx, wz, 4, 0, Math.PI * 2);
+      ctx.arc(wx, wz, 3.5, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // Active Mission Beacon
+    // 5. Active Mission Objective Beacon
     if (activeTarget) {
       const tx = cx + (activeTarget.x - tractorX) * scale;
       const tz = cy + (activeTarget.z - tractorZ) * scale;
 
-      const pulse = (Math.sin(Date.now() * 0.008) + 1) * 3 + 6;
+      const pulse = (Math.sin(Date.now() * 0.009) + 1) * 4 + 7;
       ctx.strokeStyle = '#ff9800';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.arc(tx, tz, pulse, 0, Math.PI * 2);
       ctx.stroke();
 
-      ctx.fillStyle = '#ff5722';
+      ctx.fillStyle = '#ff3d00';
       ctx.beginPath();
-      ctx.arc(tx, tz, 5, 0, Math.PI * 2);
+      ctx.arc(tx, tz, 5.5, 0, Math.PI * 2);
       ctx.fill();
+
+      // Guide line to target if off-screen
+      ctx.strokeStyle = 'rgba(255, 152, 0, 0.5)';
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(tx, tz);
+      ctx.stroke();
+      ctx.setLineDash([]);
     }
 
-    // Tractor Icon (Red arrow at center pointing in tractorHeading)
+    // 6. Forward Headlights Vision Cone
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(-tractorHeading);
+    ctx.rotate(tractorHeading);
 
+    const grad = ctx.createRadialGradient(0, 0, 2, 0, 28, 30);
+    grad.addColorStop(0, 'rgba(255, 250, 200, 0.45)');
+    grad.addColorStop(1, 'rgba(255, 250, 200, 0.0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-14, 30);
+    ctx.lineTo(14, 30);
+    ctx.closePath();
+    ctx.fill();
+
+    // Glowing Red Tractor Arrow
     ctx.fillStyle = '#f44336';
     ctx.beginPath();
-    ctx.moveTo(0, -9);
-    ctx.lineTo(6, 7);
-    ctx.lineTo(0, 4);
-    ctx.lineTo(-6, 7);
+    ctx.moveTo(0, 10);
+    ctx.lineTo(7, -7);
+    ctx.lineTo(0, -3);
+    ctx.lineTo(-7, -7);
     ctx.closePath();
     ctx.fill();
 
     ctx.restore();
     ctx.restore();
 
-    // Radar border ring
-    ctx.strokeStyle = '#81c784';
+    // Radar Bezel & North Indicator
+    ctx.strokeStyle = '#ffd54f';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(cx, cy, w * 0.48, 0, Math.PI * 2);
+    ctx.arc(cx, cy, w * 0.47, 0, Math.PI * 2);
     ctx.stroke();
+
+    // North 'N' letter at top
+    ctx.fillStyle = '#ff5252';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('N', cx - 4, 14);
   }
 
   // ==========================================
@@ -4891,29 +5154,38 @@ class UIManager {
   initTouchControls() {
     const inputs = this.game.inputs;
 
-    const bindTouch = (elemId, onDown, onUp) => {
+    const bindControl = (elemId, onDown, onUp) => {
       const el = document.getElementById(elemId);
       if (!el) return;
 
-      const handleDown = (e) => {
-        e.preventDefault();
+      const start = (e) => {
+        if (e && e.cancelable) e.preventDefault();
         onDown();
+        if (el.setPointerCapture && e.pointerId !== undefined) {
+          try { el.setPointerCapture(e.pointerId); } catch(err){}
+        }
       };
-      const handleUp = (e) => {
-        e.preventDefault();
+
+      const end = (e) => {
+        if (e && e.cancelable) e.preventDefault();
         onUp();
       };
 
-      el.addEventListener('pointerdown', handleDown);
-      el.addEventListener('pointerup', handleUp);
-      el.addEventListener('pointercancel', handleUp);
-      el.addEventListener('pointerleave', handleUp);
+      el.addEventListener('pointerdown', start);
+      el.addEventListener('pointerup', end);
+      el.addEventListener('pointercancel', end);
+
+      el.addEventListener('mousedown', start);
+      el.addEventListener('mouseup', end);
+
+      el.addEventListener('touchstart', start, { passive: false });
+      el.addEventListener('touchend', end, { passive: false });
     };
 
-    bindTouch('touch-steer-left', () => { inputs.steerLeft = true; }, () => { inputs.steerLeft = false; });
-    bindTouch('touch-steer-right', () => { inputs.steerRight = true; }, () => { inputs.steerRight = false; });
-    bindTouch('touch-gas', () => { inputs.accelerate = true; }, () => { inputs.accelerate = false; });
-    bindTouch('touch-brake', () => { inputs.brake = true; }, () => { inputs.brake = false; });
+    bindControl('touch-steer-left', () => { inputs.steerLeft = true; }, () => { inputs.steerLeft = false; });
+    bindControl('touch-steer-right', () => { inputs.steerRight = true; }, () => { inputs.steerRight = false; });
+    bindControl('touch-gas', () => { inputs.accelerate = true; }, () => { inputs.accelerate = false; });
+    bindControl('touch-brake', () => { inputs.brake = true; }, () => { inputs.brake = false; });
 
     // Single-click action buttons
     const bindClick = (elemId, callback) => {
@@ -5380,11 +5652,10 @@ class Game {
       }
     });
 
-    // Orbit camera mouse drag controls
+    // Interactive camera free-look mouse drag controls (Works in all camera modes!)
     window.addEventListener('mousedown', (e) => {
-      if (this.cameraController.mode === 'orbit' || !this.isRunning) {
-        this.cameraController.handlePointerDown(e.clientX, e.clientY);
-      }
+      if (e.target.closest('#ui-root button') || e.target.closest('#ui-root input') || e.target.closest('.modal-box')) return;
+      this.cameraController.handlePointerDown(e.clientX, e.clientY);
     });
     window.addEventListener('mousemove', (e) => {
       this.cameraController.handlePointerMove(e.clientX, e.clientY);
@@ -5392,6 +5663,23 @@ class Game {
     window.addEventListener('mouseup', () => {
       this.cameraController.handlePointerUp();
     });
+
+    // Mobile touch free-look
+    window.addEventListener('touchstart', (e) => {
+      if (e.target.closest('#ui-root button') || e.target.closest('#ui-root input') || e.target.closest('.modal-box')) return;
+      if (e.touches.length > 0) {
+        this.cameraController.handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        this.cameraController.handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+    window.addEventListener('touchend', () => {
+      this.cameraController.handlePointerUp();
+    });
+
     window.addEventListener('wheel', (e) => {
       this.cameraController.handleZoom(e.deltaY);
     }, { passive: true });
